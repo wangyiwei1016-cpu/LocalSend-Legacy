@@ -162,7 +162,7 @@ keyPassword=你的密码
 
 [MIT](LICENSE)
 
-本项目为 LocalSend 协议的独立兼容实现，与 LocalSend 官方无隶属关系；LocalSend 名称与协议规范版权归其作者所有。
+本项目为 LocalSend 协议的独立兼容实现，与 LocalSend 官方无隶属关系；LocalSend 名称与协议规范版权归其作者所有。详见 [NOTICE.md](NOTICE.md)。
 
 ---
 
@@ -175,3 +175,4 @@ keyPassword=你的密码
 - Verified on Xiaomi 2013022 (Android 4.2.1) and an Android 4.0.3 emulator; 48 unit tests pass.
 
 Build: `./gradlew assembleDebug` or `./build.ps1 -Release` (see [README](README.md) above).
+

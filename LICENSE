@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-LocalSend is a separate project (https://localsend.org). This repository is an
-independent protocol-compatible implementation and is not affiliated with or
-endorsed by the LocalSend project. The LocalSend name and protocol
-specification belong to their respective authors.
