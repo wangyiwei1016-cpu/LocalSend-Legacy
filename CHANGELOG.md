@@ -1,0 +1,24 @@
+# Changelog
+
+## v1.1 — 2026-10-21
+
+Material 3 界面改版 + 真机兼容性修复。
+
+- 界面按官方 LocalSend 的 Material 3 风格重做：单 Activity 三 tab（接收/发送/设置）、底部 64dp 导航 + 浅紫选中胶囊、圆角卡片/对话框、自绘图标/Logo/开关
+- 全部对话框改为自绘浅色圆角卡片（老系统不再出现深色 Holo 对话框）
+- 新增文本、剪贴板发送；文件夹/应用入口给出明确“暂不支持”提示
+- 修复：服务重启后 Activity 监听丢失导致接收静默 403
+- 修复：状态栏重复的事件通知（UI 可见时只 Toast/对话框）
+- 修复：设置页/发送页底部内容被底部导航遮挡
+- 修复：同 IP 不同端口的手动添加设备被去重逻辑覆盖（改为 IP+端口匹配，fingerprint 优先）
+- 真机验证：Xiaomi 2013022（Android 4.2.1 / API 17）安装、发现、接收、设置重启全部通过
+
+## v1.0 — 2026-10-21
+
+首个可交付版本。
+
+- LocalSend Protocol v2.2 明文 HTTP 服务器/客户端；v1 老协议接收端点
+- UDP 组播发现 + 手动添加 IP；默认端口 53317
+- 接收确认/自动接收、公共下载目录落盘（Android 10+ MediaStore）、进度与完成通知
+- 纯 Java 6 风格、无 AndroidX、minSdk 8（Android 2.2），release APK 约 120 KB
+- 48 项 JUnit 协议/工具测试、Lint 0 NewApi、Android 4.0.3 模拟器端到端验证

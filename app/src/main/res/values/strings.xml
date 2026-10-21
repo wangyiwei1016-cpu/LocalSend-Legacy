@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LocalSend 老机版</string>
+    <string name="title_main">LocalSend 老机版</string>
+    <string name="title_settings">设置</string>
+
+    <!-- 底部导航 -->
+    <string name="tab_receive">接收</string>
+    <string name="tab_send">发送</string>
+    <string name="tab_settings">设置</string>
+
+    <!-- 接收页 -->
+    <string name="receive_status_on">接收已开启 · 端口 %1$d</string>
+    <string name="receive_status_off">接收已停止 · 端口 %1$d</string>
+    <string name="receive_status_error">接收不可用：%1$s</string>
+    <string name="receive_link">通过链接接收</string>
+    <string name="receive_link_body">浏览器链接接收暂未实现，请让对方在 LocalSend 里选择本机发送。</string>
+
+    <!-- 发送页 -->
+    <string name="send_title">选择</string>
+    <string name="send_file">文件</string>
+    <string name="send_media">媒体</string>
+    <string name="send_clipboard">剪贴板</string>
+    <string name="send_text">文本</string>
+    <string name="send_folder">文件夹</string>
+    <string name="send_apps">应用</string>
+    <string name="nearby_devices">附近的设备</string>
+    <string name="selection_count">已选择 %1$d 个文件 · %2$s</string>
+    <string name="selection_clear">清除</string>
+    <string name="send_empty_devices">未发现设备\n请确保目标连接到同一个 Wi-Fi 网络</string>
+    <string name="toast_folder_unsupported">暂不支持发送文件夹</string>
+    <string name="toast_apps_unsupported">暂不支持发送应用</string>
+    <string name="toast_favorite_unsupported">收藏功能暂未实现</string>
+    <string name="toast_clipboard_empty">剪贴板没有文字内容</string>
+    <string name="toast_need_files">请先选择要发送的文件</string>
+    <string name="toast_files_selected">已选择 %1$d 个文件</string>
+    <string name="text_input_title">发送文本</string>
+    <string name="text_input_hint">输入要发送的文字</string>
+    <string name="text_file_prefix">文本-</string>
+    <string name="clipboard_file_prefix">剪贴板-</string>
+
+    <!-- 设备详情 -->
+    <string name="device_info_title">设备详情</string>
+    <string name="device_info_alias">别名</string>
+    <string name="device_info_model">型号</string>
+    <string name="device_info_type">类型</string>
+    <string name="device_info_ip">IP</string>
+    <string name="device_info_port">端口</string>
+    <string name="device_info_protocol">协议</string>
+    <string name="device_info_fingerprint">指纹</string>
+    <string name="device_type_mobile">手机</string>
+    <string name="device_type_desktop">电脑</string>
+
+    <!-- 设置页 -->
+    <string name="settings_general">通用</string>
+    <string name="settings_receive">接收</string>
+    <string name="settings_about">关于</string>
+    <string name="settings_device_name">设备名称</string>
+    <string name="settings_port">端口</string>
+    <string name="settings_auto_accept">自动接收文件</string>
+    <string name="settings_receive_dir">接收目录</string>
+    <string name="settings_fingerprint">本机指纹</string>
+    <string name="settings_version">版本</string>
+    <string name="settings_protocol">协议</string>
+    <string name="settings_protocol_value">LocalSend v2 明文 HTTP</string>
+    <string name="settings_version_value">1.1</string>
+    <string name="dialog_alias_title">设备名称</string>
+    <string name="dialog_port_title">端口（1024-65535）</string>
+    <string name="dialog_save">保存</string>
+    <string name="dialog_ok">确定</string>
+    <string name="dialog_close">关闭</string>
+
+    <string name="label_name">本机名称</string>
+    <string name="label_ip">本机 IP</string>
+    <string name="label_port">端口</string>
+    <string name="label_state">状态</string>
+    <string name="label_server_switch">服务开关</string>
+    <string name="label_devices">附近设备</string>
+    <string name="label_device_count">附近设备（%1$d）</string>
+
+    <string name="state_running">运行中</string>
+    <string name="state_stopped">已停止</string>
+    <string name="state_starting">启动中…</string>
+    <string name="state_error">启动失败</string>
+    <string name="port_running_format">端口 %1$d</string>
+    <string name="port_stopped_format">端口 %1$d（未运行）</string>
+    <string name="ip_unknown">未连接 Wi-Fi</string>
+
+    <string name="btn_send">发送文件</string>
+    <string name="btn_refresh">刷新</string>
+    <string name="btn_add">手动添加</string>
+    <string name="btn_settings">设置</string>
+    <string name="btn_save">保存</string>
+    <string name="btn_cancel">取消</string>
+    <string name="btn_hide">隐藏</string>
+    <string name="toggle_on">已启动</string>
+    <string name="toggle_off">已停止</string>
+
+    <string name="empty_devices">正在搜索附近设备…\n\n请确保双方在同一 Wi-Fi，\n或点「手动添加」输入对方 IP。</string>
+    <string name="recv_dir_format">接收目录：%1$s</string>
+
+    <string name="toast_select_device">请先在列表中选择一台设备</string>
+    <string name="toast_no_files">没有选择文件</string>
+    <string name="toast_no_file_manager">没有找到可用的文件管理器</string>
+    <string name="toast_service_starting">服务正在启动，请稍候</string>
+    <string name="toast_send_busy">已有发送任务正在进行</string>
+    <string name="toast_permission_denied">未授权写入公共下载目录，收到的文件将保存到应用私有目录</string>
+    <string name="toast_recv_saved">接收完成，共 %1$d 个文件</string>
+    <string name="toast_send_complete">发送完成：%1$d 个文件</string>
+    <string name="toast_send_cancelled">已取消发送</string>
+    <string name="toast_manual_connecting">正在连接 %1$s…</string>
+    <string name="toast_manual_failed">无法连接 %1$s：请确认对方已启动 LocalSend、在同一 Wi-Fi 且端口正确</string>
+    <string name="toast_manual_empty">请输入对方 IP 地址</string>
+    <string name="toast_rescan">正在重新搜索附近设备…（组播不可用时请用「手动添加」）</string>
+    <string name="toast_auto_accepted">已按自动接收设置，接收来自 %1$s 的文件</string>
+    <string name="toast_rejected_background">收到 %1$s 的文件请求，但应用不在前台且未开启自动接收，已自动拒绝</string>
+    <string name="toast_setting_saved">设置已保存，服务已重启</string>
+    <string name="toast_prepare_files">正在准备文件…</string>
+
+    <string name="err_alias_empty">设备名称不能为空</string>
+    <string name="err_port_invalid">端口必须是 1024-65535 之间的数字</string>
+    <string name="err_pick_failed">读取所选文件失败：%1$s</string>
+
+    <string name="manual_add_title">手动添加设备</string>
+    <string name="manual_add_hint">对方 IP，例如 192.168.1.5 或 192.168.1.5:53317</string>
+    <string name="manual_add_ok">添加</string>
+
+    <string name="dialog_receive_title">收到文件请求</string>
+    <string name="dialog_receive_from">来自：%1$s（%2$s）</string>
+    <string name="dialog_receive_count">共 %1$d 个文件，总计 %2$s</string>
+    <string name="dialog_receive_files">文件列表：</string>
+    <string name="dialog_receive_more">…还有 %1$d 个文件</string>
+    <string name="dialog_receive_accept">接收</string>
+    <string name="dialog_receive_reject">拒绝</string>
+
+    <string name="send_progress_title">正在发送</string>
+    <string name="send_preparing">准备发送…</string>
+    <string name="recv_progress_title">正在接收</string>
+    <string name="recv_waiting">等待对方发送数据…</string>
+
+    <string name="send_failed_title">发送失败</string>
+    <string name="recv_failed_title">接收失败</string>
+    <string name="error_title">出错了</string>
+    <string name="https_title">无法发送到加密设备</string>
+    <string name="core_missing_title">核心未就绪</string>
+
+    <string name="core_not_ready">核心协议未就绪：%1$s</string>
+    <string name="msg_send_failed">发送失败：%1$s</string>
+    <string name="msg_recv_failed">接收失败：%1$s</string>
+    <string name="msg_recv_saved_to">已保存到：%1$s</string>
+    <string name="msg_discovery_error">设备发现出错：%1$s</string>
+    <string name="msg_connect_failed">无法连接对方设备：%1$s</string>
+    <string name="msg_start_failed">启动失败：%1$s</string>
+
+    <string name="https_unsupported">对方开启了加密（HTTPS），Android 2.x 无法发送；请在对方 LocalSend 设置里关闭加密，或改用本应用接收</string>
+
+    <string name="notif_channel_name">服务状态</string>
+    <string name="notif_channel_desc">LocalSend 前台服务与传输通知</string>
+    <string name="notif_running_title">LocalSend 正在运行</string>
+    <string name="notif_running_text">端口 %1$d · %2$s</string>
+    <string name="notif_booting">正在启动…</string>
+    <string name="notif_stopped">服务已停止</string>
+    <string name="notif_core_missing_text">核心协议未就绪，服务无法启动</string>
+    <string name="notif_recv_done_title">接收完成</string>
+    <string name="notif_recv_done_text">共 %1$d 个文件，已保存到 %2$s</string>
+    <string name="notif_send_done_title">发送完成</string>
+    <string name="notif_send_done_text">已向 %1$s 发送 %2$d 个文件</string>
+    <string name="notif_error_title">LocalSend 错误</string>
+
+    <string name="field_alias">设备名称</string>
+    <string name="field_port">端口（1024-65535）</string>
+    <string name="field_port_hint">53317</string>
+    <string name="field_auto_accept">自动接收文件（无需确认）</string>
+    <string name="field_auto_accept_note">开启后，同一网络内的设备可以不经确认直接发送文件到本机。</string>
+    <string name="field_recv_dir">接收目录</string>
+    <string name="field_fingerprint">本机指纹</string>
+    <string name="field_version">版本</string>
+    <string name="settings_fingerprint_note">其他设备通过该指纹识别本机，请勿随意修改。</string>
+    <string name="version_format">版本 %1$s（build %2$d）</string>
+    <string name="settings_dir_public">下载/LocalSendLegacy（本机存储）</string>
+    <string name="settings_dir_private">应用私有目录 LocalSendLegacy（无公共存储写入权限时自动回退）</string>
+
+    <string name="protocol_http">HTTP</string>
+    <string name="protocol_https">HTTPS</string>
+    <string name="device_model_format">型号 %1$s</string>
+    <string name="device_unknown_model">未知型号</string>
+    <string name="device_detail_format">%1$s · %2$s</string>
+    <string name="device_badge_ip">未连接</string>
+</resources>

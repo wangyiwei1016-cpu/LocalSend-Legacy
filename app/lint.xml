@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+      NetUtil 用 java.net.NetworkInterface 枚举本机 IPv4，该类在 Android API 9 才存在。
+      这是有意的兼容设计：Android 2.2 (API 8) 上调用会抛 NoClassDefFoundError，
+      由 Discovery.localIPv4Addresses() 的 catch(Throwable) 捕获后返回空列表，
+      组播收发不依赖它（走 MulticastSocket.joinGroup(InetAddress)），手动 IP 添加仍可用；
+      UI 层另有 WifiManager（API 1）兜底取 IP。因此这里只对 NewApi 做定向抑制，
+      其他 NewApi 问题仍会正常报告。
+    -->
+    <issue id="NewApi">
+        <ignore path="src/main/java/com/legacy/localsend/core/NetUtil.java" />
+    </issue>
+</lint>

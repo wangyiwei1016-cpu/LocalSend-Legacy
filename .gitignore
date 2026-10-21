@@ -1,0 +1,35 @@
+# ---------- Gradle / Android ----------
+.gradle/
+build/
+app/build/
+captures/
+local.properties
+keystore.properties
+*.keystore
+*.jks
+
+# ---------- IDE ----------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 本地工作目录（验证报告原始材料、旧产物、日志等） ----------
+_local/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+
+# ---------- 其它 ----------
+*.log
+*.hprof
