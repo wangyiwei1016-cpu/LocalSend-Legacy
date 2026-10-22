@@ -26,6 +26,9 @@ public final class Prefs {
     private static final String KEY_THEME_COLOR = "themeColor";
     private static final String KEY_ADVANCED_MATERIAL = "advancedMaterial";
     private static final String KEY_SHOW_SYSTEM_APPS = "showSystemApps";
+    private static final String KEY_BACKGROUND_IMAGE = "backgroundImage";
+    private static final String KEY_BACKGROUND_BLUR = "backgroundBlur";
+    private static final String KEY_BACKGROUND_BRIGHTNESS = "backgroundBrightness";
 
     public static final int DEFAULT_PORT = 53317;
     public static final int MIN_PORT = 1024;
@@ -193,6 +196,37 @@ public final class Prefs {
 
     public void setAdvancedMaterial(boolean enabled) {
         preferences.edit().putBoolean(KEY_ADVANCED_MATERIAL, enabled).commit();
+    }
+
+    // ---------- 背景图片 ----------
+
+    public String getBackgroundImage() {
+        String path = preferences.getString(KEY_BACKGROUND_IMAGE, "");
+        return path == null ? "" : path;
+    }
+
+    public void setBackgroundImage(String path) {
+        preferences.edit().putString(KEY_BACKGROUND_IMAGE, path == null ? "" : path).commit();
+    }
+
+    public int getBackgroundBlur() {
+        int value = preferences.getInt(KEY_BACKGROUND_BLUR, 30);
+        return value < 0 ? 0 : (value > 100 ? 100 : value);
+    }
+
+    public void setBackgroundBlur(int value) {
+        int safe = value < 0 ? 0 : (value > 100 ? 100 : value);
+        preferences.edit().putInt(KEY_BACKGROUND_BLUR, safe).commit();
+    }
+
+    public int getBackgroundBrightness() {
+        int value = preferences.getInt(KEY_BACKGROUND_BRIGHTNESS, 100);
+        return value < 0 ? 0 : (value > 200 ? 200 : value);
+    }
+
+    public void setBackgroundBrightness(int value) {
+        int safe = value < 0 ? 0 : (value > 200 ? 200 : value);
+        preferences.edit().putInt(KEY_BACKGROUND_BRIGHTNESS, safe).commit();
     }
 
     // ---------- 接收目录 ----------

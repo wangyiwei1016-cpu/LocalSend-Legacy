@@ -100,6 +100,7 @@ public final class Theme {
         }
         applyPalette();
         Material.load(context);
+        Background.load(context);
     }
 
     public static int getPalette() {
@@ -179,7 +180,9 @@ public final class Theme {
         if (tag instanceof String) {
             String key = (String) tag;
             if ("page".equals(key)) {
-                if (Material.enabled) {
+                if (Background.hasImage()) {
+                    view.setBackgroundDrawable(Background.drawable());
+                } else if (Material.enabled) {
                     view.setBackgroundDrawable(Material.fog());
                 } else {
                     view.setBackgroundColor(bg);

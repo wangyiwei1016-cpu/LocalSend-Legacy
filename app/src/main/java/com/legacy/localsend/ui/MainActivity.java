@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +74,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
 
     private static final int REQ_PICK = 1001;
     private static final int REQ_WRITE_PERM = 1003;
+    private static final int REQ_BG = 1005;
 
     private static final int TAB_RECEIVE = 0;
     private static final int TAB_SEND = 1;
@@ -109,6 +111,12 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     private TextView settingsDir;
     private TextView settingsFingerprint;
     private TextView settingsVersion;
+    private TextView backgroundValue;
+    private TextView backgroundBlurValue;
+    private TextView backgroundBrightnessValue;
+    private SeekBar backgroundBlurSeek;
+    private SeekBar backgroundBrightnessSeek;
+    private boolean updatingBackground;
     private SwitchView autoSwitch;
     private SwitchView darkSwitch;
     private SwitchView advancedSwitch;
@@ -250,6 +258,13 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         settingsDir = (TextView) findViewById(R.id.settings_dir);
         settingsFingerprint = (TextView) findViewById(R.id.settings_fingerprint);
         settingsVersion = (TextView) findViewById(R.id.settings_version);
+        backgroundValue = (TextView) findViewById(R.id.background_value);
+        backgroundBlurValue = (TextView) findViewById(R.id.background_blur_value);
+        backgroundBrightnessValue = (TextView) findViewById(R.id.background_brightness_value);
+        backgroundBlurSeek = (SeekBar) findViewById(R.id.background_blur_seek);
+        backgroundBrightnessSeek = (SeekBar) findViewById(R.id.background_brightness_seek);
+        styleSeekBar(backgroundBlurSeek);
+        styleSeekBar(backgroundBrightnessSeek);
         autoSwitch = (SwitchView) findViewById(R.id.auto_accept_switch);
         darkSwitch = (SwitchView) findViewById(R.id.dark_mode_switch);
         advancedSwitch = (SwitchView) findViewById(R.id.advanced_material_switch);
@@ -274,6 +289,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         icon(R.id.chevron_alias).setIcon(IconView.CHEVRON, Theme.textSecondary);
         icon(R.id.chevron_port).setIcon(IconView.CHEVRON, Theme.textSecondary);
         icon(R.id.chevron_theme).setIcon(IconView.CHEVRON, Theme.textSecondary);
+        icon(R.id.chevron_background).setIcon(IconView.CHEVRON, Theme.textSecondary);
     }
 
     private void bindListeners() {
@@ -392,6 +408,61 @@ public class MainActivity extends Activity implements ServerService.UiListener {
                 showThemeDialog();
             }
         });
+        findViewById(R.id.row_background).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showBackgroundDialog();
+            }
+        });
+
+        backgroundBlurSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (backgroundBlurValue != null) {
+                    backgroundBlurValue.setText(getString(R.string.background_percent,
+                            Integer.valueOf(progress)));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (updatingBackground) {
+                    return;
+                }
+                Background.setBlur(MainActivity.this, seekBar.getProgress());
+                refreshBackground();
+            }
+        });
+
+        backgroundBrightnessSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (backgroundBrightnessValue != null) {
+                    backgroundBrightnessValue.setText(getString(R.string.background_percent,
+                            Integer.valueOf(progress)));
+                }
+                if (fromUser && !updatingBackground && Background.hasImage()) {
+                    Background.previewBrightness(progress);
+                    Background.invalidatePages(findViewById(android.R.id.content));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (updatingBackground) {
+                    return;
+                }
+                Background.commitBrightness(MainActivity.this);
+            }
+        });
 
         autoSwitch.setOnCheckedChangeListener(new SwitchView.OnCheckedChangeListener() {
             @Override
@@ -432,11 +503,19 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         return (IconView) findViewById(id);
     }
 
+    private void styleSeekBar(SeekBar bar) {
+        if (bar == null) {
+            return;
+        }
+        bar.setProgressDrawable(SliderDrawable.track());
+        bar.setThumb(SliderDrawable.thumb());
+        bar.setPadding(dp(12), 0, dp(12), 0);
+    }
+
     private void updateBottomNavStyle() {
         if (bottomNav == null) {
             return;
-        }
-        ViewGroup.LayoutParams raw = bottomNav.getLayoutParams();
+        }        ViewGroup.LayoutParams raw = bottomNav.getLayoutParams();
         if (raw instanceof FrameLayout.LayoutParams) {
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) raw;
             int margin = Material.enabled ? dp(12) : 0;
@@ -522,6 +601,28 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         darkSwitch.setChecked(prefs.isDarkMode());
         advancedSwitch.setChecked(prefs.isAdvancedMaterial());
         updatingSwitch = false;
+
+        boolean hasBackground = Background.hasImage();
+        backgroundValue.setText(hasBackground
+                ? getString(R.string.background_set) : getString(R.string.background_none));
+        updatingBackground = true;
+        int blurValue = prefs.getBackgroundBlur();
+        int brightnessValue = prefs.getBackgroundBrightness();
+        backgroundBlurSeek.setProgress(blurValue);
+        backgroundBrightnessSeek.setProgress(brightnessValue);
+        backgroundBlurValue.setText(hasBackground
+                ? getString(R.string.background_percent, Integer.valueOf(blurValue))
+                : getString(R.string.background_need_image));
+        backgroundBrightnessValue.setText(hasBackground
+                ? getString(R.string.background_percent, Integer.valueOf(brightnessValue))
+                : getString(R.string.background_need_image));
+        updatingBackground = false;
+        backgroundBlurSeek.setEnabled(hasBackground);
+        backgroundBrightnessSeek.setEnabled(hasBackground);
+        if (Build.VERSION.SDK_INT >= 11) {
+            backgroundBlurSeek.setAlpha(hasBackground ? 1f : 0.45f);
+            backgroundBrightnessSeek.setAlpha(hasBackground ? 1f : 0.45f);
+        }
     }
 
     /**
@@ -1284,6 +1385,15 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_BG) {
+            if (resultCode == RESULT_OK && data != null) {
+                Uri uri = data.getData();
+                if (uri != null) {
+                    importBackground(uri);
+                }
+            }
+            return;
+        }
         if (requestCode != REQ_PICK || resultCode != RESULT_OK || data == null) {
             return;
         }
@@ -2221,6 +2331,107 @@ public class MainActivity extends Activity implements ServerService.UiListener {
             default:
                 return getString(R.string.theme_mist_blue);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // 背景图片
+    // ------------------------------------------------------------------
+
+    private void showBackgroundDialog() {
+        if (!Background.hasImage()) {
+            pickBackgroundImage();
+            return;
+        }
+        final CardDialog dialog = new CardDialog(this, getString(R.string.background_title));
+        dialog.setBodyText(getString(R.string.settings_background_image));
+        dialog.addButton(getString(R.string.background_change),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        d.dismiss();
+                        pickBackgroundImage();
+                    }
+                });
+        dialog.addButton(getString(R.string.background_clear),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        Background.clear(MainActivity.this);
+                        refreshBackground();
+                        refreshSettings();
+                        toast(getString(R.string.background_cleared));
+                        d.dismiss();
+                    }
+                });
+        dialog.addButton(getString(R.string.btn_cancel),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        d.dismiss();
+                    }
+                });
+        dialog.show();
+    }
+
+    private void pickBackgroundImage() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+            startActivityForResult(Intent.createChooser(intent,
+                    getString(R.string.background_choose)), REQ_BG);
+        } catch (ActivityNotFoundException e) {
+            toast(getString(R.string.toast_no_file_manager));
+        }
+    }
+
+    private void importBackground(final Uri uri) {
+        closePrepareDialog();
+        prepareDialog = new CardDialog(this, getString(R.string.background_title));
+        prepareDialog.setBodyText(getString(R.string.background_importing));
+        prepareDialog.setCancelable(false);
+        prepareDialog.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String path = null;
+                String error = null;
+                try {
+                    path = Background.importImage(MainActivity.this, uri);
+                } catch (Throwable t) {
+                    error = t.getMessage() == null ? t.getClass().getName() : t.getMessage();
+                }
+                final String savedPath = path;
+                final String failure = error;
+                uiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        closePrepareDialog();
+                        if (isFinishing()) {
+                            return;
+                        }
+                        if (savedPath == null) {
+                            showError(getString(R.string.background_title),
+                                    getString(R.string.background_import_failed));
+                            return;
+                        }
+                        Background.setImage(MainActivity.this, savedPath);
+                        if (!Background.hasImage()) {
+                            showError(getString(R.string.background_title),
+                                    getString(R.string.background_import_failed));
+                            return;
+                        }
+                        refreshBackground();
+                        refreshSettings();
+                        toast(getString(R.string.background_updated));
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void refreshBackground() {
+        Background.refreshPages(findViewById(android.R.id.content));
     }
 
     private void startSendProgress() {
