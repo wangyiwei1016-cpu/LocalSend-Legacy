@@ -1,24 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#FFFFFFFF</color>
-    <color name="black">#FF000000</color>
-    <color name="transparent">#00000000</color>
 
     <color name="primary">#FF2563EB</color>
-    <color name="primary_dark">#FF1D4ED8</color>
     <color name="primary_container">#FFE8EAFF</color>
-    <color name="primary_light">#FFEFF6FF</color>
 
     <color name="text_primary">#FF111827</color>
     <color name="text_secondary">#FF6B7280</color>
-    <color name="text_tertiary">#FF9CA3AF</color>
     <color name="stroke">#FFE5E7EB</color>
-    <color name="divider">#FFE5E7EB</color>
-    <color name="card_stroke">#FFE5E7EB</color>
 
-    <color name="success">#FF16A34A</color>
-    <color name="danger">#FFDC2626</color>
-    <color name="btn_disabled">#FF93C5FD</color>
-    <color name="row_pressed">#FFF3F4F6</color>
-    <color name="row_selected">#FFEFF6FF</color>
 </resources>
