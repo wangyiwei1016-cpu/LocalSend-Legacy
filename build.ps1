@@ -27,8 +27,8 @@ param(
     [string]$ExpectedPackage = "com.legacy.localsend",
     [int]$ExpectedMinSdk = 8,
     [int]$ExpectedTargetSdk = 30,
-    [string]$ExpectedVersionName = "1.1",
-    [int]$ExpectedVersionCode = 2
+    [string]$ExpectedVersionName = "1.2",
+    [int]$ExpectedVersionCode = 3
 )
 
 $ErrorActionPreference = "Stop"

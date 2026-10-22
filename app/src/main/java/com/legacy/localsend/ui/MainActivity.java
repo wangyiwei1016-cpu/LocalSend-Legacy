@@ -7,8 +7,13 @@ import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +26,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -44,8 +50,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -60,10 +70,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     private static final int TAB_SEND = 1;
     private static final int TAB_SETTINGS = 2;
 
-    private static final int COLOR_PRIMARY = 0xFF2563EB;
-    private static final int COLOR_TEXT = 0xFF111827;
-    private static final int COLOR_TEXT_SECONDARY = 0xFF6B7280;
-    private static final int COLOR_DANGER = 0xFFDC2626;
+    private static final String APK_MIME = "application/vnd.android.package-archive";
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
@@ -94,6 +101,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     private TextView settingsFingerprint;
     private TextView settingsVersion;
     private SwitchView autoSwitch;
+    private SwitchView darkSwitch;
     private boolean updatingSwitch;
 
     private CardDialog receiveDialog;
@@ -107,6 +115,13 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     private TextView progressFile;
     private boolean progressIsSend;
     private CardDialog prepareDialog;
+
+    private CardDialog appPickerDialog;
+    private LinearLayout appListContainer;
+    private TextView appLoadingView;
+    private SwitchView appSystemSwitch;
+    private boolean appPickerShowSystem;
+    private int appLoadGeneration;
 
     private long sendTotalBytes;
     private final Map<String, Long> sendProgress = new HashMap<String, Long>();
@@ -140,13 +155,25 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Theme.load(this);
+        getWindow().setBackgroundDrawable(new ColorDrawable(Theme.bg));
         setContentView(R.layout.activity_main);
+        Theme.applyTo(findViewById(android.R.id.content));
         prefs = Prefs.get(this);
         bindViews();
+        bottomNav.refreshTheme();
         bindListeners();
-        selectTab(TAB_RECEIVE);
+        int initialTab = savedInstanceState == null
+                ? TAB_RECEIVE : savedInstanceState.getInt("currentTab", TAB_RECEIVE);
+        selectTab(initialTab);
         requestStoragePermissionIfNeeded();
         ServerService.start(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentTab", currentTab);
     }
 
     @Override
@@ -169,6 +196,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         closeReceiveDialog(true);
         closeProgressDialog();
         closePrepareDialog();
+        closeAppPicker();
         ServerService current = service;
         service = null;
         if (current != null) {
@@ -207,24 +235,25 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         settingsFingerprint = (TextView) findViewById(R.id.settings_fingerprint);
         settingsVersion = (TextView) findViewById(R.id.settings_version);
         autoSwitch = (SwitchView) findViewById(R.id.auto_accept_switch);
+        darkSwitch = (SwitchView) findViewById(R.id.dark_mode_switch);
 
         rebuildIcons();
     }
 
     private void rebuildIcons() {
-        icon(R.id.tile_file_icon).setIcon(IconView.FILE, COLOR_PRIMARY);
-        icon(R.id.tile_media_icon).setIcon(IconView.IMAGE, COLOR_PRIMARY);
-        icon(R.id.tile_clipboard_icon).setIcon(IconView.CLIPBOARD, COLOR_PRIMARY);
-        icon(R.id.tile_text_icon).setIcon(IconView.TEXT, COLOR_PRIMARY);
-        icon(R.id.tile_folder_icon).setIcon(IconView.FOLDER, COLOR_PRIMARY);
-        icon(R.id.tile_apps_icon).setIcon(IconView.APPS, COLOR_PRIMARY);
-        icon(R.id.btn_refresh).setIcon(IconView.REFRESH, COLOR_TEXT);
-        icon(R.id.btn_manual_add).setIcon(IconView.TARGET, COLOR_TEXT);
-        icon(R.id.btn_favorite).setIcon(IconView.HEART, COLOR_TEXT);
-        icon(R.id.btn_gear).setIcon(IconView.GEAR, COLOR_TEXT);
-        icon(R.id.receive_link_icon).setIcon(IconView.GLOBE, COLOR_PRIMARY);
-        icon(R.id.chevron_alias).setIcon(IconView.CHEVRON, COLOR_TEXT_SECONDARY);
-        icon(R.id.chevron_port).setIcon(IconView.CHEVRON, COLOR_TEXT_SECONDARY);
+        icon(R.id.tile_file_icon).setIcon(IconView.FILE, Theme.primary);
+        icon(R.id.tile_media_icon).setIcon(IconView.IMAGE, Theme.primary);
+        icon(R.id.tile_clipboard_icon).setIcon(IconView.CLIPBOARD, Theme.primary);
+        icon(R.id.tile_text_icon).setIcon(IconView.TEXT, Theme.primary);
+        icon(R.id.tile_folder_icon).setIcon(IconView.FOLDER, Theme.primary);
+        icon(R.id.tile_apps_icon).setIcon(IconView.APPS, Theme.primary);
+        icon(R.id.btn_refresh).setIcon(IconView.REFRESH, Theme.text);
+        icon(R.id.btn_manual_add).setIcon(IconView.TARGET, Theme.text);
+        icon(R.id.btn_favorite).setIcon(IconView.HEART, Theme.text);
+        icon(R.id.btn_gear).setIcon(IconView.GEAR, Theme.text);
+        icon(R.id.receive_link_icon).setIcon(IconView.GLOBE, Theme.primary);
+        icon(R.id.chevron_alias).setIcon(IconView.CHEVRON, Theme.textSecondary);
+        icon(R.id.chevron_port).setIcon(IconView.CHEVRON, Theme.textSecondary);
     }
 
     private void bindListeners() {
@@ -275,7 +304,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         findViewById(R.id.tile_apps).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toast(getString(R.string.toast_apps_unsupported));
+                showAppPicker();
             }
         });
 
@@ -343,7 +372,16 @@ public class MainActivity extends Activity implements ServerService.UiListener {
             }
         });
 
-
+        darkSwitch.setOnCheckedChangeListener(new SwitchView.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchView view, boolean checked) {
+                if (updatingSwitch) {
+                    return;
+                }
+                prefs.setDarkMode(checked);
+                recreateForTheme();
+            }
+        });
     }
 
     private IconView icon(int id) {
@@ -398,13 +436,13 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         String error = service == null ? null : service.getStatusMessage();
         if (!serverRunning && error != null && error.length() > 0) {
             receiveStatus.setText(getString(R.string.receive_status_error, error));
-            receiveStatus.setTextColor(COLOR_DANGER);
+            receiveStatus.setTextColor(Theme.danger);
         } else if (serverRunning) {
             receiveStatus.setText(getString(R.string.receive_status_on, Integer.valueOf(port)));
-            receiveStatus.setTextColor(COLOR_TEXT_SECONDARY);
+            receiveStatus.setTextColor(Theme.textSecondary);
         } else {
             receiveStatus.setText(getString(R.string.receive_status_off, Integer.valueOf(port)));
-            receiveStatus.setTextColor(COLOR_TEXT_SECONDARY);
+            receiveStatus.setTextColor(Theme.textSecondary);
         }
     }
 
@@ -419,7 +457,23 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         settingsVersion.setText(getString(R.string.settings_version_value));
         updatingSwitch = true;
         autoSwitch.setChecked(prefs.isAutoAccept());
+        darkSwitch.setChecked(prefs.isDarkMode());
         updatingSwitch = false;
+    }
+
+    private void recreateForTheme() {
+        if (Build.VERSION.SDK_INT >= 11) {
+            recreateCompat();
+        } else {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+        }
+    }
+
+    @TargetApi(11)
+    private void recreateCompat() {
+        recreate();
     }
 
     // ------------------------------------------------------------------
@@ -466,15 +520,15 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
         content.addView(textView(getString(R.string.dialog_receive_from, senderName, senderIp),
-                14f, COLOR_TEXT_SECONDARY));
+                14f, Theme.textSecondary));
         TextView countView = textView(getString(R.string.dialog_receive_count,
-                Integer.valueOf(fileCount), UiUtil.formatSize(pendingReceiveTotal)), 16f, COLOR_TEXT);
+                Integer.valueOf(fileCount), UiUtil.formatSize(pendingReceiveTotal)), 16f, Theme.text);
         LinearLayout.LayoutParams countParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         countParams.topMargin = dp(8);
         content.addView(countView, countParams);
         if (request != null && request.files != null && !request.files.isEmpty()) {
-            TextView listLabel = textView(getString(R.string.dialog_receive_files), 13f, COLOR_TEXT_SECONDARY);
+            TextView listLabel = textView(getString(R.string.dialog_receive_files), 13f, Theme.textSecondary);
             LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             labelParams.topMargin = dp(12);
@@ -485,10 +539,10 @@ public class MainActivity extends Activity implements ServerService.UiListener {
                 LinearLayout row = new LinearLayout(this);
                 row.setOrientation(LinearLayout.HORIZONTAL);
                 row.setGravity(Gravity.CENTER_VERTICAL);
-                TextView nameView = textView(file.displayName(), 14f, COLOR_TEXT);
+                TextView nameView = textView(file.displayName(), 14f, Theme.text);
                 nameView.setSingleLine(true);
                 nameView.setEllipsize(android.text.TextUtils.TruncateAt.END);
-                TextView sizeView = textView(UiUtil.formatSize(file.size), 12f, COLOR_TEXT_SECONDARY);
+                TextView sizeView = textView(UiUtil.formatSize(file.size), 12f, Theme.textSecondary);
                 LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
                         0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
                 row.addView(nameView, nameParams);
@@ -992,6 +1046,380 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     }
 
     // ------------------------------------------------------------------
+    // 发送：选择应用（读取已安装应用，发送其安装包）
+    // ------------------------------------------------------------------
+
+    private void showAppPicker() {
+        if (appPickerDialog != null) {
+            return;
+        }
+        appPickerShowSystem = prefs.isShowSystemApps();
+
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        TextView label = textView(getString(R.string.app_picker_show_system), 14f, Theme.text);
+        header.addView(label, new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+        appSystemSwitch = new SwitchView(this);
+        appSystemSwitch.setChecked(appPickerShowSystem);
+        appSystemSwitch.setOnCheckedChangeListener(new SwitchView.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchView view, boolean checked) {
+                appPickerShowSystem = checked;
+                prefs.setShowSystemApps(checked);
+                loadAppsAsync();
+            }
+        });
+        header.addView(appSystemSwitch, new LinearLayout.LayoutParams(dp(52), dp(32)));
+        content.addView(header);
+
+        appLoadingView = textView(getString(R.string.app_picker_loading), 14f, Theme.textSecondary);
+        LinearLayout.LayoutParams loadingParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        loadingParams.topMargin = dp(14);
+        loadingParams.bottomMargin = dp(8);
+        content.addView(appLoadingView, loadingParams);
+
+        appListContainer = new LinearLayout(this);
+        appListContainer.setOrientation(LinearLayout.VERTICAL);
+        content.addView(appListContainer);
+
+        appPickerDialog = new CardDialog(this, getString(R.string.app_picker_title));
+        appPickerDialog.setBodyView(content);
+        appPickerDialog.addButton(getString(R.string.app_picker_close),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        d.dismiss();
+                    }
+                });
+        appPickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface d) {
+                closeAppPicker();
+            }
+        });
+        try {
+            appPickerDialog.show();
+        } catch (Throwable t) {
+            appPickerDialog = null;
+            appListContainer = null;
+            appLoadingView = null;
+            appSystemSwitch = null;
+            toast(String.valueOf(t.getMessage()));
+            return;
+        }
+        loadAppsAsync();
+    }
+
+    private void loadAppsAsync() {
+        if (appListContainer == null || appLoadingView == null) {
+            return;
+        }
+        appLoadingView.setVisibility(View.VISIBLE);
+        appLoadingView.setText(getString(R.string.app_picker_loading));
+        appListContainer.removeAllViews();
+        final int generation = ++appLoadGeneration;
+        final boolean includeSystem = appPickerShowSystem;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<AppEntry> apps = null;
+                String error = null;
+                try {
+                    apps = queryInstalledApps(includeSystem);
+                } catch (Throwable t) {
+                    error = t.getMessage() == null ? t.getClass().getName() : t.getMessage();
+                }
+                final List<AppEntry> result = apps;
+                final String failure = error;
+                uiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (generation != appLoadGeneration || appListContainer == null || isFinishing()) {
+                            return;
+                        }
+                        appLoadingView.setVisibility(View.GONE);
+                        appListContainer.removeAllViews();
+                        if (failure != null) {
+                            appListContainer.addView(textView(
+                                    getString(R.string.app_picker_failed, failure),
+                                    14f, Theme.danger));
+                            return;
+                        }
+                        if (result == null || result.isEmpty()) {
+                            appListContainer.addView(textView(
+                                    getString(R.string.app_picker_empty), 14f, Theme.textSecondary));
+                            return;
+                        }
+                        for (int i = 0; i < result.size(); i++) {
+                            appListContainer.addView(buildAppRow(result.get(i)));
+                        }
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private List<AppEntry> queryInstalledApps(boolean includeSystem) {
+        PackageManager pm = getPackageManager();
+        Intent launcher = new Intent(Intent.ACTION_MAIN);
+        launcher.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> resolved = pm.queryIntentActivities(launcher, 0);
+        Map<String, AppEntry> unique = new LinkedHashMap<String, AppEntry>();
+        if (resolved != null) {
+            for (int i = 0; i < resolved.size(); i++) {
+                ResolveInfo info = resolved.get(i);
+                if (info == null || info.activityInfo == null || info.activityInfo.applicationInfo == null) {
+                    continue;
+                }
+                String packageName = info.activityInfo.packageName;
+                if (packageName == null || unique.containsKey(packageName)) {
+                    continue;
+                }
+                ApplicationInfo appInfo = info.activityInfo.applicationInfo;
+                boolean system = (appInfo.flags & (ApplicationInfo.FLAG_SYSTEM
+                        | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
+                if (system && !includeSystem) {
+                    continue;
+                }
+                String sourceDir = appInfo.sourceDir;
+                if (sourceDir == null || sourceDir.length() == 0) {
+                    continue;
+                }
+                File apk = new File(sourceDir);
+                if (!apk.isFile()) {
+                    continue;
+                }
+                String label;
+                try {
+                    CharSequence text = info.loadLabel(pm);
+                    label = text == null ? packageName : text.toString();
+                } catch (Throwable t) {
+                    label = packageName;
+                }
+                String version = "";
+                try {
+                    PackageInfo packageInfo = pm.getPackageInfo(packageName, 0);
+                    if (packageInfo != null && packageInfo.versionName != null) {
+                        version = packageInfo.versionName;
+                    }
+                } catch (Throwable ignored) {
+                    // 部分应用读不到版本号
+                }
+                Drawable icon = null;
+                try {
+                    icon = info.loadIcon(pm);
+                } catch (Throwable ignored) {
+                    // 图标加载失败时留空
+                }
+                unique.put(packageName, new AppEntry(packageName, label, version,
+                        sourceDir, apk.length(), system, icon));
+            }
+        }
+        List<AppEntry> list = new ArrayList<AppEntry>(unique.values());
+        final Collator collator;
+        Collator instance;
+        try {
+            instance = Collator.getInstance(java.util.Locale.CHINA);
+        } catch (Throwable t) {
+            instance = null;
+        }
+        collator = instance;
+        Collections.sort(list, new Comparator<AppEntry>() {
+            @Override
+            public int compare(AppEntry left, AppEntry right) {
+                if (left.system != right.system) {
+                    return left.system ? 1 : -1;
+                }
+                int result;
+                if (collator != null) {
+                    result = collator.compare(left.label, right.label);
+                } else {
+                    result = left.label.compareToIgnoreCase(right.label);
+                }
+                if (result != 0) {
+                    return result;
+                }
+                return left.packageName.compareToIgnoreCase(right.packageName);
+            }
+        });
+        return list;
+    }
+
+    private View buildAppRow(final AppEntry entry) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setMinimumHeight(dp(60));
+        row.setPadding(dp(6), dp(8), dp(6), dp(8));
+        row.setBackgroundDrawable(Theme.rowPressable());
+        row.setClickable(true);
+        row.setFocusable(true);
+
+        ImageView icon = new ImageView(this);
+        icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        if (entry.icon != null) {
+            icon.setImageDrawable(entry.icon);
+        }
+        row.addView(icon, new LinearLayout.LayoutParams(dp(40), dp(40)));
+
+        LinearLayout texts = new LinearLayout(this);
+        texts.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        textParams.leftMargin = dp(12);
+        row.addView(texts, textParams);
+
+        TextView name = textView(entry.label, 15f, Theme.text);
+        name.setSingleLine(true);
+        name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        texts.addView(name);
+
+        String detail;
+        if (entry.version != null && entry.version.length() > 0) {
+            detail = getString(R.string.app_picker_detail, entry.version,
+                    UiUtil.formatSize(entry.size));
+        } else {
+            detail = getString(R.string.app_picker_detail_size, UiUtil.formatSize(entry.size));
+        }
+        if (entry.system) {
+            detail = getString(R.string.app_picker_system) + " · " + detail;
+        }
+        TextView detailView = textView(detail, 12f, Theme.textSecondary);
+        detailView.setSingleLine(true);
+        detailView.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams detailParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        detailParams.topMargin = dp(2);
+        texts.addView(detailView, detailParams);
+
+        row.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (appPickerDialog != null) {
+                    appPickerDialog.dismiss();
+                }
+                closeAppPicker();
+                prepareApp(entry);
+            }
+        });
+        return row;
+    }
+
+    private void prepareApp(final AppEntry entry) {
+        closePrepareDialog();
+        prepareDialog = new CardDialog(this, getString(R.string.toast_prepare_files));
+        prepareDialog.setBodyText(getString(R.string.app_picker_preparing));
+        prepareDialog.setCancelable(false);
+        prepareDialog.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SendFile file = null;
+                String error = null;
+                try {
+                    file = buildAppSendFile(entry);
+                } catch (Throwable t) {
+                    error = t.getMessage() == null ? t.getClass().getName() : t.getMessage();
+                }
+                final SendFile result = file;
+                final String failure = error;
+                uiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        closePrepareDialog();
+                        if (isFinishing()) {
+                            return;
+                        }
+                        if (failure != null || result == null) {
+                            showError(getString(R.string.send_failed_title),
+                                    getString(R.string.app_picker_unreadable));
+                            return;
+                        }
+                        List<SendFile> list = new ArrayList<SendFile>();
+                        list.add(result);
+                        setSelection(list);
+                        toast(getString(R.string.app_picker_selected, entry.label));
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private SendFile buildAppSendFile(AppEntry entry) throws IOException {
+        final File apk = new File(entry.sourceDir);
+        if (!apk.isFile() || !apk.canRead()) {
+            throw new IOException(getString(R.string.app_picker_unreadable));
+        }
+        String version = entry.version == null ? "" : entry.version.trim();
+        String base = entry.label == null || entry.label.length() == 0
+                ? entry.packageName : entry.label;
+        if (base.length() > 60) {
+            base = base.substring(0, 60);
+        }
+        if (version.length() > 0) {
+            base = base + "_" + version;
+        }
+        String fileName = FileMeta.sanitizeFileName(base + ".apk");
+        FileMeta meta = new FileMeta(UUID.randomUUID().toString(), fileName,
+                apk.length(), APK_MIME);
+        return new SendFile(meta, new FileSource() {
+            @Override
+            public long length() {
+                return apk.length();
+            }
+
+            @Override
+            public InputStream openStream() throws IOException {
+                return new FileInputStream(apk);
+            }
+        });
+    }
+
+    private void closeAppPicker() {
+        appLoadGeneration++;
+        CardDialog dialog = appPickerDialog;
+        appPickerDialog = null;
+        appListContainer = null;
+        appLoadingView = null;
+        appSystemSwitch = null;
+        if (dialog != null) {
+            try {
+                dialog.dismiss();
+            } catch (Throwable ignored) {
+                // 忽略
+            }
+        }
+    }
+
+    private static final class AppEntry {
+        final String packageName;
+        final String label;
+        final String version;
+        final String sourceDir;
+        final long size;
+        final boolean system;
+        final Drawable icon;
+
+        AppEntry(String packageName, String label, String version, String sourceDir,
+                 long size, boolean system, Drawable icon) {
+            this.packageName = packageName;
+            this.label = label;
+            this.version = version;
+            this.sourceDir = sourceDir;
+            this.size = size;
+            this.system = system;
+            this.icon = icon;
+        }
+    }
+
+    // ------------------------------------------------------------------
     // 手动添加 / 设备详情
     // ------------------------------------------------------------------
 
@@ -1064,9 +1492,9 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.TOP);
-        TextView labelView = textView(label, 14f, COLOR_TEXT_SECONDARY);
+        TextView labelView = textView(label, 14f, Theme.textSecondary);
         labelView.setMinWidth(dp(70));
-        TextView valueView = textView(value, 14f, COLOR_TEXT);
+        TextView valueView = textView(value, 14f, Theme.text);
         LinearLayout.LayoutParams valueParams = new LinearLayout.LayoutParams(
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
         row.addView(labelView);
@@ -1176,20 +1604,20 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         progressBar.setMax(1000);
         progressBar.setProgress(0);
         try {
-            progressBar.setProgressDrawable(getResources().getDrawable(R.drawable.progress_horizontal));
+            progressBar.setProgressDrawable(Theme.progressDrawable());
         } catch (Throwable ignored) {
             // 使用系统默认进度条
         }
         LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(8));
         content.addView(progressBar, barParams);
-        progressPercent = textView("0%", 12f, COLOR_TEXT_SECONDARY);
+        progressPercent = textView("0%", 12f, Theme.textSecondary);
         LinearLayout.LayoutParams percentParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         percentParams.topMargin = dp(8);
         content.addView(progressPercent, percentParams);
         progressFile = textView(getString(send ? R.string.send_preparing : R.string.recv_waiting),
-                14f, COLOR_TEXT);
+                14f, Theme.text);
         progressFile.setSingleLine(true);
         progressFile.setEllipsize(android.text.TextUtils.TruncateAt.END);
         LinearLayout.LayoutParams fileParams = new LinearLayout.LayoutParams(
@@ -1344,6 +1772,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
             final ServerService.DeviceEntry entry = devices.get(i);
             View card = getLayoutInflater().inflate(R.layout.item_device, deviceContainer, false);
             bindDeviceCard(card, entry);
+            Theme.applyTo(card);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             if (i > 0) {
@@ -1367,7 +1796,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         IconView infoIcon = (IconView) view.findViewById(R.id.device_info);
 
         boolean mobile = "mobile".equals(entry.info.deviceType);
-        deviceIcon.setIcon(mobile ? IconView.PHONE : IconView.LAPTOP, COLOR_TEXT);
+        deviceIcon.setIcon(mobile ? IconView.PHONE : IconView.LAPTOP, Theme.text);
         nameView.setText(entry.displayName());
         protocolChip.setText(entry.isHttps()
                 ? getString(R.string.protocol_https) : getString(R.string.protocol_http));
@@ -1378,7 +1807,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         } else {
             modelChip.setVisibility(View.GONE);
         }
-        infoIcon.setIcon(IconView.INFO, COLOR_TEXT_SECONDARY);
+        infoIcon.setIcon(IconView.INFO, Theme.textSecondary);
         infoIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1393,9 +1822,9 @@ public class MainActivity extends Activity implements ServerService.UiListener {
 
     private EditText createInput(boolean numeric) {
         EditText input = new EditText(this);
-        input.setBackgroundResource(R.drawable.input_bg);
-        input.setTextColor(COLOR_TEXT);
-        input.setHintTextColor(COLOR_TEXT_SECONDARY);
+        input.setBackgroundDrawable(Theme.inputDrawable());
+        input.setTextColor(Theme.text);
+        input.setHintTextColor(Theme.textSecondary);
         input.setTextSize(16f);
         input.setSingleLine(true);
         input.setPadding(dp(12), 0, dp(12), 0);

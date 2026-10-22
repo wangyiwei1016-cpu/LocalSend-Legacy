@@ -7,6 +7,8 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.legacy.localsend.ui.Theme;
+
 /**
  * 自绘开关：52x32dp 轨道 + 24dp 滑块 + 180ms 位移动画（用 postDelayed 实现，API 8 可用）。
  */
@@ -112,7 +114,7 @@ public class SwitchView extends View implements View.OnClickListener {
             return;
         }
         float radius = height / 2f;
-        int trackColor = blend(0xFFE8EAFF, 0xFF2563EB, progress);
+        int trackColor = blend(Theme.switchTrackOff, Theme.primary, progress);
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(trackColor);
         rect.set(0f, 0f, width, height);
@@ -122,7 +124,7 @@ public class SwitchView extends View implements View.OnClickListener {
         float minX = thumbRadius + height * 0.0625f;
         float maxX = width - minX;
         float thumbX = minX + (maxX - minX) * progress;
-        paint.setColor(blend(0xFF6B7280, 0xFFFFFFFF, progress));
+        paint.setColor(blend(Theme.switchThumbOff, Theme.switchThumbOn, progress));
         canvas.drawCircle(thumbX, height / 2f, thumbRadius, paint);
     }
 

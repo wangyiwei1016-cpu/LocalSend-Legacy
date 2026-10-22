@@ -30,8 +30,8 @@
 - **兼容**：minSdk 8（Android 2.2），同一 APK 可装到 Android 4.x / 5.x … 14；`targetSdk 30`
 - **发现**：UDP 组播 `224.0.0.167:53317` 自动发现 + 手动添加 `IP:端口`
 - **接收**：确认弹窗 / 自动接收开关；写入 `Download/LocalSendLegacy`（Android 10+ 走 MediaStore，无需存储权限；无外置存储时回退应用私有目录）
-- **发送**：文件、图片、文本、剪贴板；多选文件（API 18+）；进度、取消、完成通知
-- **界面**：Material 3 风格自绘（图标、Logo、开关、圆角对话框全部 Canvas/形状实现，无矢量图/AndroidX）
+- **发送**：文件、图片、文本、剪贴板、已安装应用（读取应用列表并发送其安装包，可切换是否显示系统应用）；多选文件（API 18+）；进度、取消、完成通知
+- **界面**：Material 3 风格自绘（图标、Logo、开关、圆角对话框全部 Canvas/形状实现，无矢量图/AndroidX）；支持浅色 / 深色模式
 - **后台**：前台服务常驻，退出应用后仍可接收（受厂商后台策略影响）
 
 ## 与官方 LocalSend 的互通
@@ -59,10 +59,10 @@ LocalSend v2 协议同时允许 `protocol: "http"` 与 `"https"`，设备在组�
 
 | 项 | release | debug |
 | --- | --- | --- |
-| 版本 | 1.1（versionCode 2） | 同左 |
+| 版本 | 1.2（versionCode 3） | 同左 |
 | minSdk / targetSdk | 8 / 30 | 同左 |
-| 大小 | 119,919 B | 143,256 B |
-| SHA-256 | `321F494A6C64B4AD75D217623A5B53BA30ADC285376A028FA9997F674838848A` | `D776B3CAEE67511A67F16FD6A527EA5709DC6227F3715A3E10CCDA5417556D41` |
+| 大小 | 127,794 B | 152,015 B |
+| SHA-256 | `F8B97C08212C195A7526A91DDE2FA6D6EC703D0CBA91813F7CA23E97933C5039` | `48F31630B6E74233BDB350A693D3F2B35FFCE2E5C22A4E531F2B63D7A18D1E0C` |
 | 签名 | v1=true、v2=true | v1=true、v2=true（debug） |
 
 ## 使用
@@ -71,8 +71,8 @@ LocalSend v2 协议同时允许 `protocol: "http"` 与 `"https"`，设备在组�
 2. 打开应用，「接收」页显示本机名称与端口（默认 `53317`）；
 3. 对方设备出现在「发送」页的「附近的设备」里；没出现就点刷新，或用「手动添加」输入 `IP:53317`；
 4. 接收：对方发起后本机弹出确认框，点「接收」，文件保存到 `Download/LocalSendLegacy/`；
-5. 发送：在「发送」页选择文件/图片/文本/剪贴板，再点目标设备，等待对方确认；
-6. 「设置」页可修改设备名、端口、自动接收，查看本机指纹与版本。
+5. 发送：在「发送」页选择文件/图片/文本/剪贴板/应用（点「应用」后从已安装列表里选一个，发送其 APK），再点目标设备，等待对方确认；
+6. 「设置」页可修改设备名、端口、自动接收、深色模式，查看本机指纹与版本。
 
 ## 构建
 
@@ -147,7 +147,7 @@ keyPassword=你的密码
 
 - **明文传输**：同一 Wi-Fi 下可被嗅探，请仅在可信局域网使用；不支持 HTTPS 对端 / 官方默认加密的客户端
 - 未实现浏览器 Web 下载页（announce 中 `download:false`），「通过链接接收」仅给出说明
-- 文件夹、应用发送暂不支持；不支持断点续传
+- 文件夹发送暂不支持；应用仅发送基础 APK（Android 5.0+ 的 split APK 只发 base.apk）；不支持断点续传
 - Android 2.0/2.1（API 5–7）未纳入支持范围（最低 2.2）
 - 没有 API 8 真机/模拟器镜像，2.2 兼容性通过 Lint + DEX 反汇编 + API 15 Dalvik 交叉验证；建议在真实 2.2/2.3 机器上再验证一次
 - 老系统的系统字体会影响部分圆角/字重观感，功能不受影响
@@ -168,7 +168,7 @@ keyPassword=你的密码
 
 ## English summary
 
-**LocalSend Legacy** is an independent Android client for the [LocalSend](https://localsend.org) protocol, built to run on **Android 2.2 (API 8) and above** — including very old devices that cannot use modern TLS. It implements the LocalSend v2 plain-HTTP protocol (`protocol:"http"`) plus the legacy v1 receive endpoints, with a hand-drawn Material 3 style UI, no AndroidX/Kotlin/native libs, and a ~120 KB APK.
+**LocalSend Legacy** is an independent Android client for the [LocalSend](https://localsend.org) protocol, built to run on **Android 2.2 (API 8) and above** — including very old devices that cannot use modern TLS. It implements the LocalSend v2 plain-HTTP protocol (`protocol:"http"`) plus the legacy v1 receive endpoints, with a hand-drawn Material 3 style UI (light/dark), no AndroidX/Kotlin/native libs, and a ~128 KB APK. Besides files, text and clipboard, it can send the APK of any installed app (with an option to include system apps).
 
 - Receiving from the latest official LocalSend works out of the box (the official sender follows the receiver's advertised `protocol:"http"`).
 - Sending to an official LocalSend peer requires disabling **Encryption** on that peer (Settings → Advanced settings → Network), because Android 2.x has no TLS 1.2.

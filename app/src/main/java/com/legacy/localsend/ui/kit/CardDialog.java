@@ -16,10 +16,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.legacy.localsend.R;
+import com.legacy.localsend.ui.Theme;
 
 /**
- * 自绘浅色卡片对话框：透明 window + 白色圆角卡片（20dp 圆角 + 1dp 描边），
- * 标题 / 可滚动内容 / 右对齐文字按钮。全系统（含 Android 2.x）都是浅色，不依赖系统 AlertDialog 主题。
+ * 自绘卡片对话框：透明 window + 圆角卡片（20dp 圆角 + 1dp 描边），
+ * 标题 / 可滚动内容 / 右对齐文字按钮，颜色跟随 Theme（支持深色模式）。
  */
 public class CardDialog extends Dialog {
 
@@ -45,12 +46,12 @@ public class CardDialog extends Dialog {
 
         card = new LinearLayout(context);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackgroundResource(R.drawable.shape_card);
+        card.setBackgroundDrawable(Theme.strokedRoundRect(Theme.surface, Theme.stroke, 20));
         card.setPadding(dp(20), dp(20), dp(20), dp(12));
 
         titleView = new TextView(context);
         titleView.setText(title);
-        titleView.setTextColor(0xFF111827);
+        titleView.setTextColor(Theme.text);
         titleView.setTextSize(18f);
         titleView.getPaint().setFakeBoldText(true);
         card.addView(titleView, new LinearLayout.LayoutParams(
@@ -95,7 +96,7 @@ public class CardDialog extends Dialog {
     public void setBodyText(CharSequence text) {
         TextView textView = new TextView(getContext());
         textView.setText(text);
-        textView.setTextColor(0xFF6B7280);
+        textView.setTextColor(Theme.textSecondary);
         textView.setTextSize(14f);
         textView.setLineSpacing(dp(4), 1f);
         setBodyView(textView);
@@ -110,13 +111,13 @@ public class CardDialog extends Dialog {
     public void addButton(CharSequence text, final DialogInterface.OnClickListener listener) {
         TextView button = new TextView(getContext());
         button.setText(text);
-        button.setTextColor(0xFF2563EB);
+        button.setTextColor(Theme.primary);
         button.setTextSize(15f);
         button.getPaint().setFakeBoldText(true);
         button.setGravity(Gravity.CENTER);
         button.setPadding(dp(16), 0, dp(16), 0);
         button.setMinHeight(dp(48));
-        button.setBackgroundResource(R.drawable.dialog_button);
+        button.setBackgroundDrawable(Theme.dialogButtonDrawable());
         button.setClickable(true);
         button.setFocusable(true);
         button.setOnClickListener(new View.OnClickListener() {

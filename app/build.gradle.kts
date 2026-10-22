@@ -25,8 +25,8 @@ android {
         // Android 2.2 (Froyo) 为最低兼容版本
         minSdk = 8
         targetSdk = 30
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
     }
 
     signingConfigs {

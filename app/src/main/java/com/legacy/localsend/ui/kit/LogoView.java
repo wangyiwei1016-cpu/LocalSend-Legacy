@@ -7,6 +7,8 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.legacy.localsend.ui.Theme;
+
 /** 接收页 Logo：蓝色虚线圆环（12 段）+ 中心实心圆。 */
 public class LogoView extends View {
 
@@ -43,7 +45,7 @@ public class LogoView extends View {
         float strokeWidth = size * 0.07f;
         float centerRadius = size * 0.185f;
 
-        paint.setColor(0xFF2563EB);
+        paint.setColor(Theme.primary);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(strokeWidth);
         rect.set(cx - ringRadius, cy - ringRadius, cx + ringRadius, cy + ringRadius);

@@ -8,6 +8,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.legacy.localsend.ui.Theme;
+
 /** 底部导航：3 项（接收/发送/设置），选中项图标包在 56x32dp 浅紫胶囊里。 */
 public class BottomNav extends LinearLayout {
 
@@ -41,9 +43,9 @@ public class BottomNav extends LinearLayout {
 
     private void init(Context context) {
         setOrientation(HORIZONTAL);
-        setBackgroundColor(0xFFFFFFFF);
+        setBackgroundColor(Theme.surface);
         setWillNotDraw(false);
-        dividerPaint.setColor(0xFFE5E7EB);
+        dividerPaint.setColor(Theme.stroke);
         dividerPaint.setStrokeWidth(1f);
         for (int i = 0; i < 3; i++) {
             final int index = i;
@@ -83,9 +85,17 @@ public class BottomNav extends LinearLayout {
             frames[i] = frame;
             icons[i] = icon;
             labels[i] = label;
-            icon.setIcon(ICONS[i], 0xFF9CA3AF);
+            icon.setIcon(ICONS[i], Theme.textTertiary);
         }
         select(0, false);
+    }
+
+    /** 主题切换后刷新自绘颜色。 */
+    public void refreshTheme() {
+        setBackgroundColor(Theme.surface);
+        dividerPaint.setColor(Theme.stroke);
+        select(selectedIndex, false);
+        invalidate();
     }
 
     public void setListener(Listener l) {
@@ -107,11 +117,11 @@ public class BottomNav extends LinearLayout {
         selectedIndex = index;
         for (int i = 0; i < 3; i++) {
             boolean active = i == index;
-            frames[i].setBackgroundResource(active
-                    ? com.legacy.localsend.R.drawable.shape_pill_container
-                    : com.legacy.localsend.R.drawable.transparent);
-            icons[i].setIconColor(active ? 0xFF2563EB : 0xFF9CA3AF);
-            labels[i].setTextColor(active ? 0xFF2563EB : 0xFF9CA3AF);
+            frames[i].setBackgroundDrawable(active
+                    ? Theme.roundRect(Theme.primaryContainer, 16)
+                    : Theme.roundRect(0x00000000, 16));
+            icons[i].setIconColor(active ? Theme.primary : Theme.textTertiary);
+            labels[i].setTextColor(active ? Theme.primary : Theme.textTertiary);
             labels[i].getPaint().setFakeBoldText(active);
             labels[i].invalidate();
         }

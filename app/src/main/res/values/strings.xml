@@ -29,7 +29,6 @@
     <string name="selection_clear">清除</string>
     <string name="send_empty_devices">未发现设备\n请确保目标连接到同一个 Wi-Fi 网络</string>
     <string name="toast_folder_unsupported">暂不支持发送文件夹</string>
-    <string name="toast_apps_unsupported">暂不支持发送应用</string>
     <string name="toast_favorite_unsupported">收藏功能暂未实现</string>
     <string name="toast_clipboard_empty">剪贴板没有文字内容</string>
     <string name="toast_need_files">请先选择要发送的文件</string>
@@ -38,6 +37,20 @@
     <string name="text_input_hint">输入要发送的文字</string>
     <string name="text_file_prefix">文本-</string>
     <string name="clipboard_file_prefix">剪贴板-</string>
+
+    <!-- 应用选择 -->
+    <string name="app_picker_title">选择应用</string>
+    <string name="app_picker_show_system">显示系统应用</string>
+    <string name="app_picker_loading">正在读取已安装应用…</string>
+    <string name="app_picker_empty">没有找到可发送的应用</string>
+    <string name="app_picker_failed">读取应用列表失败：%1$s</string>
+    <string name="app_picker_detail">版本 %1$s · %2$s</string>
+    <string name="app_picker_detail_size">安装包 %1$s</string>
+    <string name="app_picker_preparing">正在读取安装包…</string>
+    <string name="app_picker_unreadable">无法读取该应用的安装包</string>
+    <string name="app_picker_selected">已选择应用：%1$s</string>
+    <string name="app_picker_system">系统</string>
+    <string name="app_picker_close">关闭</string>
 
     <!-- 设备详情 -->
     <string name="device_info_title">设备详情</string>
@@ -58,12 +71,13 @@
     <string name="settings_device_name">设备名称</string>
     <string name="settings_port">端口</string>
     <string name="settings_auto_accept">自动接收文件</string>
+    <string name="settings_dark_mode">深色模式</string>
     <string name="settings_receive_dir">接收目录</string>
     <string name="settings_fingerprint">本机指纹</string>
     <string name="settings_version">版本</string>
     <string name="settings_protocol">协议</string>
     <string name="settings_protocol_value">LocalSend v2 明文 HTTP</string>
-    <string name="settings_version_value">1.1</string>
+    <string name="settings_version_value">1.2</string>
     <string name="dialog_alias_title">设备名称</string>
     <string name="dialog_port_title">端口（1024-65535）</string>
     <string name="dialog_save">保存</string>

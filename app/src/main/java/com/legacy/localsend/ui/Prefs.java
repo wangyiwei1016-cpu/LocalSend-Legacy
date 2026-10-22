@@ -22,6 +22,8 @@ public final class Prefs {
     private static final String KEY_PORT = "port";
     private static final String KEY_FINGERPRINT = "fingerprint";
     private static final String KEY_AUTO_ACCEPT = "autoAccept";
+    private static final String KEY_DARK_MODE = "darkMode";
+    private static final String KEY_SHOW_SYSTEM_APPS = "showSystemApps";
 
     public static final int DEFAULT_PORT = 53317;
     public static final int MIN_PORT = 1024;
@@ -141,6 +143,26 @@ public final class Prefs {
 
     public void setAutoAccept(boolean autoAccept) {
         preferences.edit().putBoolean(KEY_AUTO_ACCEPT, autoAccept).commit();
+    }
+
+    // ---------- 深色模式 ----------
+
+    public boolean isDarkMode() {
+        return preferences.getBoolean(KEY_DARK_MODE, false);
+    }
+
+    public void setDarkMode(boolean darkMode) {
+        preferences.edit().putBoolean(KEY_DARK_MODE, darkMode).commit();
+    }
+
+    // ---------- 应用列表：是否显示系统应用 ----------
+
+    public boolean isShowSystemApps() {
+        return preferences.getBoolean(KEY_SHOW_SYSTEM_APPS, false);
+    }
+
+    public void setShowSystemApps(boolean show) {
+        preferences.edit().putBoolean(KEY_SHOW_SYSTEM_APPS, show).commit();
     }
 
     // ---------- 接收目录 ----------

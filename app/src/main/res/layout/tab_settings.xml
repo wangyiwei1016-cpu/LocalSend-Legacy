@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:orientation="vertical"
+    android:tag="page"
     android:paddingLeft="20dp"
     android:paddingRight="20dp"
     android:paddingTop="14dp">
@@ -37,6 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/shape_card"
+                android:tag="card"
                 android:orientation="vertical"
                 android:padding="16dp">
 
@@ -86,7 +88,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/stroke" />
+                    android:background="@color/stroke"
+                    android:tag="divider" />
 
                 <LinearLayout
                     android:id="@+id/row_port"
@@ -121,6 +124,32 @@
                         android:layout_height="24dp"
                         android:layout_marginLeft="6dp" />
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/stroke"
+                    android:tag="divider" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_dark_mode"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp" />
+
+                    <com.legacy.localsend.ui.kit.SwitchView
+                        android:id="@+id/dark_mode_switch"
+                        android:layout_width="52dp"
+                        android:layout_height="32dp" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -128,6 +157,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/shape_card"
+                android:tag="card"
                 android:orientation="vertical"
                 android:padding="16dp">
 
@@ -162,7 +192,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/stroke" />
+                    android:background="@color/stroke"
+                    android:tag="divider" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -193,6 +224,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/shape_card"
+                android:tag="card"
                 android:orientation="vertical"
                 android:padding="16dp">
 
@@ -231,7 +263,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/stroke" />
+                    android:background="@color/stroke"
+                    android:tag="divider" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -258,7 +291,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/stroke" />
+                    android:background="@color/stroke"
+                    android:tag="divider" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
