@@ -27,7 +27,6 @@ import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.EditText;
@@ -182,8 +181,6 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         selectTab(initialTab);
         requestStoragePermissionIfNeeded();
         ServerService.start(this);
-        attachBlurScrollListener();
-        Material.scheduleCapture(this);
     }
 
     @Override
@@ -203,7 +200,6 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         if (!attachToService()) {
             uiHandler.post(attachRunnable);
         }
-        Material.scheduleCapture(this);
     }
 
     @Override
@@ -453,21 +449,6 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         bottomNav.setAdvanced(Material.enabled);
     }
 
-    /** 页面滚动停下后重新截屏，让玻璃后的模糊跟着内容走。 */
-    private void attachBlurScrollListener() {
-        View root = findViewById(android.R.id.content);
-        if (root == null) {
-            return;
-        }
-        root.getViewTreeObserver().addOnScrollChangedListener(
-                new ViewTreeObserver.OnScrollChangedListener() {
-                    @Override
-                    public void onScrollChanged() {
-                        Material.scheduleCapture(MainActivity.this);
-                    }
-                });
-    }
-
     private void selectTab(int index) {
         currentTab = index;
         tabReceive.setVisibility(index == TAB_RECEIVE ? View.VISIBLE : View.GONE);
@@ -483,7 +464,6 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         } else {
             refreshSettings();
         }
-        Material.scheduleCapture(this);
     }
 
     private boolean attachToService() {
@@ -587,8 +567,6 @@ public class MainActivity extends Activity implements ServerService.UiListener {
                 content.startAnimation(fade);
             }
         }
-        attachBlurScrollListener();
-        Material.scheduleCapture(this);
     }
 
     // ------------------------------------------------------------------
