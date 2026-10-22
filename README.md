@@ -7,12 +7,12 @@
 ![minSdk](https://img.shields.io/badge/minSdk-8%20(Android%202.2)-blue)
 ![License](https://img.shields.io/github/license/wangyiwei1016-cpu/LocalSend-Legacy)
 
-> 纯 Java 6 风格手写实现，无 AndroidX / AppCompat / Kotlin / 原生库；最小 APK 约 120 KB。  
+> 纯 Java 6 风格手写实现，无 AndroidX / AppCompat / Kotlin / 原生库；release APK 约 150 KB。  
 > 已在真机 **Xiaomi 2013022（红米 1，Android 4.2.1 / API 17）** 上完成收发验证。
 
 ## 界面
 
-界面参考官方 LocalSend 的 Material 3 风格重做：底部三 tab、浅紫选中胶囊、圆角卡片/对话框、自绘图标与开关。
+界面参考官方 LocalSend 的 Material 3 风格重做：底部三 tab、悬浮玻璃导航、圆角卡片/对话框、自绘图标与开关；内置 6 套低饱和莫奈色主题、深色模式、高级材质雾透控件和自定义背景图。
 
 | 接收 | 发送 | 设置 |
 | --- | --- | --- |
@@ -30,9 +30,26 @@
 - **兼容**：minSdk 8（Android 2.2），同一 APK 可装到 Android 4.x / 5.x … 14；`targetSdk 30`
 - **发现**：UDP 组播 `224.0.0.167:53317` 自动发现 + 手动添加 `IP:端口`
 - **接收**：确认弹窗 / 自动接收开关；写入 `Download/LocalSendLegacy`（Android 10+ 走 MediaStore，无需存储权限；无外置存储时回退应用私有目录）
+- **接收完成**：弹出带预览的窗口，图片显示缩略图、APK 显示应用图标，可点文件直接打开，或点「打开 / 取消」
+- **接收历史**：接收首页右上角时钟入口；按文件类型显示图标（图片/视频/音频/APK/PDF/文档/压缩包），可打开文件、仅删除记录，或连同源文件一起删除
 - **发送**：文件、图片、文本、剪贴板、已安装应用（读取应用列表并发送其安装包，可切换是否显示系统应用）；多选文件（API 18+）；进度、取消、完成通知
-- **界面**：Material 3 风格自绘（图标、Logo、开关、圆角对话框全部 Canvas/形状实现，无矢量图/AndroidX）；支持浅色 / 深色模式
+- **外观**：6 套低饱和莫奈色主题（雾蓝/鼠尾草/藕粉/薰衣草/陶土/青灰）+ 深色模式；高级材质开关会启用悬浮玻璃底栏和雾透玻璃控件
+- **背景**：可从相册选择自定义背景图，手动调节模糊（0–100%）和亮度（0–200%），支持更换/清除
 - **后台**：前台服务常驻，退出应用后仍可接收（受厂商后台策略影响）
+
+## 外观与增强功能
+
+| 功能 | 入口 | 说明 |
+| --- | --- | --- |
+| 主题色 | 设置 → 通用 → 主题色 | 6 套低饱和莫奈色，每套都有浅色/深色版本，点选后原地重建界面，不黑闪 |
+| 深色模式 | 设置 → 通用 → 深色模式 | 整页背景、卡片、文字、图标、对话框、开关、底部导航同步切换 |
+| 高级材质 | 设置 → 通用 → 高级材质 | 底部导航变成悬浮玻璃 bar；历史记录、通过链接接收、发送六宫格、刷新/收藏等可点击控件加半透明雾面与细包边 |
+| 背景图片 | 设置 → 背景 → 背景图片 | 相册选图，压缩后保存在应用私有目录；可更换、清除 |
+| 背景模糊 | 设置 → 背景 → 背景模糊 | 0–100%，松手后重新生成模糊背景 |
+| 背景亮度 | 设置 → 背景 → 背景亮度 | 0–200%，拖动实时预览 |
+| 接收完成 | 接收完成后自动弹出 | 图片缩略图 / APK 图标预览；点文件打开，或点「打开 / 取消」 |
+| 接收历史 | 接收首页右上角时钟按钮 | 文件类型图标、打开文件、仅删记录 / 删除记录和源文件 |
+| 应用发送 | 发送 → 应用 | 自动读取已安装可启动应用，可切换是否显示系统应用，发送其 APK |
 
 ## 与官方 LocalSend 的互通
 
@@ -61,8 +78,8 @@ LocalSend v2 协议同时允许 `protocol: "http"` 与 `"https"`，设备在组�
 | --- | --- | --- |
 | 版本 | 1.2（versionCode 3） | 同左 |
 | minSdk / targetSdk | 8 / 30 | 同左 |
-| 大小 | 127,787 B | 171,300 B |
-| SHA-256 | `7E6155CBA405DAB0FA743F1411F920999A9BA727EEDCB0281CBDC4BEB2863EE7` | `4F942D55D7FE51E34644B5D4A8C7916F70D7E17FA1F90C35401F04FD8EFE89DB` |
+| 大小 | 152,183 B | 255,976 B |
+| SHA-256 | `03042D35D4580225F54412D363209D7F1336F0968A1FCE54130B67ADB3E87328` | `0AAD9AC12CE30D55B6AABA6DA2C72955C7B4B881A19602C7E66AC9FDD767E46D` |
 | 签名 | v1=true、v2=true | v1=true、v2=true（debug） |
 
 ## 使用
@@ -72,7 +89,8 @@ LocalSend v2 协议同时允许 `protocol: "http"` 与 `"https"`，设备在组�
 3. 对方设备出现在「发送」页的「附近的设备」里；没出现就点刷新，或用「手动添加」输入 `IP:53317`；
 4. 接收：对方发起后本机弹出确认框，点「接收」，文件保存到 `Download/LocalSendLegacy/`；
 5. 发送：在「发送」页选择文件/图片/文本/剪贴板/应用（点「应用」后从已安装列表里选一个，发送其 APK），再点目标设备，等待对方确认；
-6. 「设置」页可修改设备名、端口、自动接收、深色模式，查看本机指纹与版本。
+6. 接收完成后会弹预览窗口；点接收页右上角时钟可看历史、打开文件或删除记录；
+7. 「设置」页可修改设备名、端口、自动接收，切换主题色/深色模式/高级材质，设置背景图片及其模糊、亮度，查看本机指纹与版本。
 
 ## 构建
 
@@ -148,6 +166,7 @@ keyPassword=你的密码
 - **明文传输**：同一 Wi-Fi 下可被嗅探，请仅在可信局域网使用；不支持 HTTPS 对端 / 官方默认加密的客户端
 - 未实现浏览器 Web 下载页（announce 中 `download:false`），「通过链接接收」仅给出说明
 - 文件夹发送暂不支持；应用仅发送基础 APK（Android 5.0+ 的 split APK 只发 base.apk）；不支持断点续传
+- 背景图会压缩成 JPEG（最长边 1600px）保存在应用私有目录；不跟随图片 EXIF 旋转信息，极端情况下横拍照片可能方向不对
 - Android 2.0/2.1（API 5–7）未纳入支持范围（最低 2.2）
 - 没有 API 8 真机/模拟器镜像，2.2 兼容性通过 Lint + DEX 反汇编 + API 15 Dalvik 交叉验证；建议在真实 2.2/2.3 机器上再验证一次
 - 老系统的系统字体会影响部分圆角/字重观感，功能不受影响
@@ -168,7 +187,7 @@ keyPassword=你的密码
 
 ## English summary
 
-**LocalSend Legacy** is an independent Android client for the [LocalSend](https://localsend.org) protocol, built to run on **Android 2.2 (API 8) and above** — including very old devices that cannot use modern TLS. It implements the LocalSend v2 plain-HTTP protocol (`protocol:"http"`) plus the legacy v1 receive endpoints, with a hand-drawn Material 3 style UI (light/dark), no AndroidX/Kotlin/native libs, and a ~128 KB APK. Besides files, text and clipboard, it can send the APK of any installed app (with an option to include system apps).
+**LocalSend Legacy** is an independent Android client for the [LocalSend](https://localsend.org) protocol, built to run on **Android 2.2 (API 8) and above** — including very old devices that cannot use modern TLS. It implements the LocalSend v2 plain-HTTP protocol (`protocol:"http"`) plus the legacy v1 receive endpoints, with a hand-drawn Material 3 style UI (six low-saturation Monet palettes, dark mode, optional frosted-glass controls), no AndroidX/Kotlin/native libs, and a ~150 KB APK. Besides files, text and clipboard, it can send the APK of any installed app (with an option to include system apps), shows a preview dialog after receiving, keeps a received-file history with per-type icons, and supports a custom background image with adjustable blur and brightness.
 
 - Receiving from the latest official LocalSend works out of the box (the official sender follows the receiver's advertised `protocol:"http"`).
 - Sending to an official LocalSend peer requires disabling **Encryption** on that peer (Settings → Advanced settings → Network), because Android 2.x has no TLS 1.2.
