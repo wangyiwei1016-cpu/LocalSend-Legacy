@@ -12,6 +12,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -26,6 +28,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -51,12 +54,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.Collator;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -116,6 +122,9 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     private TextView progressFile;
     private boolean progressIsSend;
     private CardDialog prepareDialog;
+    private CardDialog historyDialog;
+    private CardDialog receiveCompleteDialog;
+    private int previewGeneration;
 
     private CardDialog appPickerDialog;
     private LinearLayout appListContainer;
@@ -198,6 +207,8 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         closeProgressDialog();
         closePrepareDialog();
         closeAppPicker();
+        closeHistoryDialog();
+        closeReceiveCompleteDialog();
         ServerService current = service;
         service = null;
         if (current != null) {
@@ -254,6 +265,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         icon(R.id.btn_favorite).setIcon(IconView.HEART, Theme.text);
         icon(R.id.btn_gear).setIcon(IconView.GEAR, Theme.text);
         icon(R.id.receive_link_icon).setIcon(IconView.GLOBE, Theme.primary);
+        icon(R.id.btn_history).setIcon(IconView.HISTORY, Theme.text);
         icon(R.id.chevron_alias).setIcon(IconView.CHEVRON, Theme.textSecondary);
         icon(R.id.chevron_port).setIcon(IconView.CHEVRON, Theme.textSecondary);
         icon(R.id.chevron_theme).setIcon(IconView.CHEVRON, Theme.textSecondary);
@@ -271,6 +283,13 @@ public class MainActivity extends Activity implements ServerService.UiListener {
             @Override
             public void onClick(View view) {
                 showLinkInfoDialog();
+            }
+        });
+
+        findViewById(R.id.btn_history).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showHistoryDialog();
             }
         });
 
@@ -482,6 +501,8 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         closeProgressDialog();
         closePrepareDialog();
         closeAppPicker();
+        closeHistoryDialog();
+        closeReceiveCompleteDialog();
 
         Theme.load(this);
         getWindow().setBackgroundDrawable(new ColorDrawable(Theme.bg));
@@ -648,22 +669,14 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         recvTotalBytes = 0L;
         recvProgress.clear();
         int count = files == null ? 0 : files.size();
-        StringBuilder location = new StringBuilder();
-        if (files != null) {
-            int limit = Math.min(files.size(), 2);
-            for (int i = 0; i < limit; i++) {
-                if (i > 0) {
-                    location.append('\n');
-                }
-                location.append(files.get(i).describe());
-            }
-        }
-        toast(getString(R.string.toast_recv_saved, Integer.valueOf(count)));
-        if (location.length() > 0) {
-            toast(getString(R.string.msg_recv_saved_to, location.toString()));
-        }
+        List<HistoryStore.Entry> entries = HistoryStore.addReceived(this, files);
         prefs.refreshReceiveDirectory();
         refreshSettings();
+        if (entries.isEmpty()) {
+            toast(getString(R.string.toast_recv_saved, Integer.valueOf(count)));
+        } else {
+            showReceiveCompleteDialog(entries);
+        }
     }
 
     @Override
@@ -673,6 +686,492 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         recvProgress.clear();
         showError(getString(R.string.recv_failed_title),
                 getString(R.string.msg_recv_failed, String.valueOf(reason)));
+    }
+
+    // ------------------------------------------------------------------
+    // 接收完成：带预览的打开窗口
+    // ------------------------------------------------------------------
+
+    private void showReceiveCompleteDialog(final List<HistoryStore.Entry> entries) {
+        closeReceiveCompleteDialog();
+        if (entries == null || entries.isEmpty()) {
+            return;
+        }
+        final int generation = ++previewGeneration;
+        long total = 0L;
+        for (int i = 0; i < entries.size(); i++) {
+            total += entries.get(i).size;
+        }
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.addView(textView(getString(R.string.recv_complete_summary,
+                Integer.valueOf(entries.size()), UiUtil.formatSize(total)), 14f, Theme.textSecondary));
+        TextView hint = textView(getString(R.string.recv_complete_hint), 12f, Theme.textTertiary);
+        LinearLayout.LayoutParams hintParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        hintParams.topMargin = dp(4);
+        content.addView(hint, hintParams);
+
+        final List<PreviewHolder> holders = new ArrayList<PreviewHolder>();
+        int limit = Math.min(entries.size(), 12);
+        for (int i = 0; i < limit; i++) {
+            final HistoryStore.Entry entry = entries.get(i);
+            String icon = FileTypes.iconFor(entry.name, entry.mime);
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setMinimumHeight(dp(68));
+            row.setPadding(dp(6), dp(6), dp(6), dp(6));
+            row.setBackgroundDrawable(Theme.rowPressable());
+            row.setClickable(true);
+            row.setFocusable(true);
+
+            FrameLayout preview = new FrameLayout(this);
+            IconView typeIcon = new IconView(this);
+            typeIcon.setIcon(icon, FileTypes.colorFor(icon));
+            preview.addView(typeIcon, new FrameLayout.LayoutParams(dp(28), dp(28), Gravity.CENTER));
+            ImageView thumb = new ImageView(this);
+            thumb.setVisibility(View.GONE);
+            thumb.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            preview.addView(thumb, new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+            row.addView(preview, new LinearLayout.LayoutParams(dp(56), dp(56)));
+
+            LinearLayout texts = new LinearLayout(this);
+            texts.setOrientation(LinearLayout.VERTICAL);
+            LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            textParams.leftMargin = dp(12);
+            TextView name = textView(entry.name, 15f, Theme.text);
+            name.setSingleLine(true);
+            name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            texts.addView(name);
+            TextView detail = textView(UiUtil.formatSize(entry.size), 12f, Theme.textSecondary);
+            LinearLayout.LayoutParams detailParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            detailParams.topMargin = dp(2);
+            texts.addView(detail, detailParams);
+            row.addView(texts, textParams);
+
+            row.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    openHistoryEntry(entry);
+                }
+            });
+            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            rowParams.topMargin = dp(4);
+            content.addView(row, rowParams);
+
+            PreviewHolder holder = new PreviewHolder();
+            holder.entry = entry;
+            holder.icon = icon;
+            holder.image = thumb;
+            holder.iconView = typeIcon;
+            holders.add(holder);
+        }
+        if (entries.size() > limit) {
+            TextView more = textView(getString(R.string.recv_complete_more,
+                    Integer.valueOf(entries.size() - limit)), 12f, Theme.textTertiary);
+            LinearLayout.LayoutParams moreParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            moreParams.topMargin = dp(6);
+            content.addView(more, moreParams);
+        }
+
+        receiveCompleteDialog = new CardDialog(this, getString(R.string.recv_complete_title));
+        receiveCompleteDialog.setBodyView(content);
+        receiveCompleteDialog.addButton(getString(R.string.recv_complete_cancel),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        d.dismiss();
+                    }
+                });
+        receiveCompleteDialog.addButton(getString(R.string.recv_complete_open),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        d.dismiss();
+                        openHistoryEntry(entries.get(0));
+                    }
+                });
+        receiveCompleteDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                receiveCompleteDialog = null;
+                previewGeneration++;
+            }
+        });
+        receiveCompleteDialog.show();
+
+        for (int i = 0; i < holders.size(); i++) {
+            PreviewHolder holder = holders.get(i);
+            if (IconView.IMAGE.equals(holder.icon) || IconView.APK.equals(holder.icon)) {
+                loadPreview(holder, generation);
+            }
+        }
+    }
+
+    private void loadPreview(final PreviewHolder holder, final int generation) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Bitmap bitmap;
+                final Drawable apkIcon;
+                if (IconView.IMAGE.equals(holder.icon)) {
+                    bitmap = decodeThumbnail(holder.entry);
+                    apkIcon = null;
+                } else if (IconView.APK.equals(holder.icon)) {
+                    bitmap = null;
+                    apkIcon = loadApkIcon(holder.entry);
+                } else {
+                    return;
+                }
+                if (bitmap == null && apkIcon == null) {
+                    return;
+                }
+                uiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (generation != previewGeneration || receiveCompleteDialog == null) {
+                            return;
+                        }
+                        if (bitmap != null) {
+                            holder.image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                            holder.image.setImageBitmap(bitmap);
+                            holder.image.setVisibility(View.VISIBLE);
+                            holder.iconView.setVisibility(View.GONE);
+                        } else {
+                            holder.image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                            holder.image.setImageDrawable(apkIcon);
+                            holder.image.setVisibility(View.VISIBLE);
+                            holder.iconView.setVisibility(View.GONE);
+                        }
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private Bitmap decodeThumbnail(HistoryStore.Entry entry) {
+        try {
+            BitmapFactory.Options bounds = new BitmapFactory.Options();
+            bounds.inJustDecodeBounds = true;
+            InputStream input = openEntryStream(entry);
+            try {
+                BitmapFactory.decodeStream(input, null, bounds);
+            } finally {
+                UiUtil.closeQuietly(input);
+            }
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
+                return null;
+            }
+            int sample = 1;
+            while (bounds.outWidth / (sample * 2) >= 160
+                    && bounds.outHeight / (sample * 2) >= 160) {
+                sample *= 2;
+            }
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = sample;
+            input = openEntryStream(entry);
+            try {
+                return BitmapFactory.decodeStream(input, null, options);
+            } finally {
+                UiUtil.closeQuietly(input);
+            }
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private InputStream openEntryStream(HistoryStore.Entry entry) throws IOException {
+        if (entry.uri != null && entry.uri.length() > 0) {
+            InputStream input = getContentResolver().openInputStream(Uri.parse(entry.uri));
+            if (input == null) {
+                throw new IOException("无法打开文件");
+            }
+            return input;
+        }
+        if (entry.path != null && entry.path.length() > 0) {
+            return new FileInputStream(entry.path);
+        }
+        throw new IOException("文件不存在");
+    }
+
+    private Drawable loadApkIcon(HistoryStore.Entry entry) {
+        String path = entry.path;
+        File temp = null;
+        try {
+            if ((path == null || path.length() == 0) && entry.uri != null) {
+                if (entry.size > 30L * 1024L * 1024L) {
+                    return null;
+                }
+                temp = copyUriToCache(Uri.parse(entry.uri), entry.name);
+                path = temp.getAbsolutePath();
+            }
+            if (path == null || path.length() == 0) {
+                return null;
+            }
+            PackageInfo info = getPackageManager().getPackageArchiveInfo(path, 0);
+            if (info == null || info.applicationInfo == null) {
+                return null;
+            }
+            ApplicationInfo appInfo = info.applicationInfo;
+            appInfo.sourceDir = path;
+            appInfo.publicSourceDir = path;
+            return appInfo.loadIcon(getPackageManager());
+        } catch (Throwable t) {
+            return null;
+        } finally {
+            if (temp != null) {
+                temp.delete();
+            }
+        }
+    }
+
+    private static final class PreviewHolder {
+        HistoryStore.Entry entry;
+        String icon;
+        ImageView image;
+        IconView iconView;
+    }
+
+    // ------------------------------------------------------------------
+    // 接收历史
+    // ------------------------------------------------------------------
+
+    private void showHistoryDialog() {
+        closeHistoryDialog();
+        historyDialog = new CardDialog(this, getString(R.string.history_title));
+        refreshHistoryDialog();
+        historyDialog.addDismissButton(getString(R.string.dialog_close));
+        historyDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                historyDialog = null;
+            }
+        });
+        historyDialog.show();
+    }
+
+    private void refreshHistoryDialog() {
+        if (historyDialog == null) {
+            return;
+        }
+        List<HistoryStore.Entry> entries = HistoryStore.load(this);
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        if (entries.isEmpty()) {
+            content.addView(textView(getString(R.string.history_empty), 14f, Theme.textSecondary));
+        } else {
+            content.addView(textView(getString(R.string.history_count,
+                    Integer.valueOf(entries.size())), 13f, Theme.textSecondary));
+            for (int i = 0; i < entries.size(); i++) {
+                final HistoryStore.Entry entry = entries.get(i);
+                LinearLayout row = new LinearLayout(this);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                row.setGravity(Gravity.CENTER_VERTICAL);
+                row.setMinimumHeight(dp(64));
+                row.setPadding(dp(4), dp(4), dp(4), dp(4));
+                row.setBackgroundDrawable(Theme.rowPressable());
+                row.setClickable(true);
+                row.setFocusable(true);
+
+                String icon = FileTypes.iconFor(entry.name, entry.mime);
+                IconView typeIcon = new IconView(this);
+                typeIcon.setIcon(icon, FileTypes.colorFor(icon));
+                row.addView(typeIcon, new LinearLayout.LayoutParams(dp(36), dp(36)));
+
+                LinearLayout texts = new LinearLayout(this);
+                texts.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+                textParams.leftMargin = dp(12);
+                TextView name = textView(entry.name, 15f, Theme.text);
+                name.setSingleLine(true);
+                name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                texts.addView(name);
+                String detail = historyDetail(entry);
+                TextView detailView = textView(detail, 12f, Theme.textSecondary);
+                detailView.setSingleLine(true);
+                detailView.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                LinearLayout.LayoutParams detailParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                detailParams.topMargin = dp(2);
+                texts.addView(detailView, detailParams);
+                row.addView(texts, textParams);
+
+                IconView delete = new IconView(this);
+                delete.setIcon(IconView.DELETE, Theme.textTertiary);
+                delete.setPadding(dp(10), dp(10), dp(10), dp(10));
+                delete.setClickable(true);
+                delete.setFocusable(true);
+                delete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showHistoryDeleteDialog(entry);
+                    }
+                });
+                row.addView(delete, new LinearLayout.LayoutParams(dp(40), dp(40)));
+
+                row.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        openHistoryEntry(entry);
+                    }
+                });
+                LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                rowParams.topMargin = dp(2);
+                content.addView(row, rowParams);
+            }
+        }
+        historyDialog.setBodyView(content);
+    }
+
+    private String historyDetail(HistoryStore.Entry entry) {
+        StringBuilder detail = new StringBuilder();
+        String time = formatHistoryTime(entry.time);
+        if (time.length() > 0) {
+            detail.append(time);
+        }
+        if (detail.length() > 0) {
+            detail.append(" · ");
+        }
+        detail.append(UiUtil.formatSize(entry.size));
+        if (!isEntryAvailable(entry)) {
+            detail.append(" · ").append(getString(R.string.history_missing));
+        }
+        return detail.toString();
+    }
+
+    private boolean isEntryAvailable(HistoryStore.Entry entry) {
+        if (entry.path != null && entry.path.length() > 0) {
+            return new File(entry.path).isFile();
+        }
+        return entry.uri != null && entry.uri.length() > 0;
+    }
+
+    private void showHistoryDeleteDialog(final HistoryStore.Entry entry) {
+        final CardDialog dialog = new CardDialog(this, getString(R.string.history_delete_title));
+        dialog.setBodyText(getString(R.string.history_delete_message, entry.name));
+        dialog.addButton(getString(R.string.history_delete_record),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        deleteHistoryEntry(entry, false);
+                        d.dismiss();
+                    }
+                });
+        dialog.addButton(getString(R.string.history_delete_both),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        deleteHistoryEntry(entry, true);
+                        d.dismiss();
+                    }
+                });
+        dialog.addButton(getString(R.string.btn_cancel),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        d.dismiss();
+                    }
+                });
+        dialog.show();
+    }
+
+    private void deleteHistoryEntry(HistoryStore.Entry entry, boolean deleteSource) {
+        HistoryStore.remove(this, entry.id);
+        if (!deleteSource) {
+            toast(getString(R.string.history_deleted_record));
+        } else if (HistoryStore.deleteFile(this, entry)) {
+            toast(getString(R.string.history_deleted_both));
+        } else {
+            toast(getString(R.string.history_delete_file_failed));
+        }
+        refreshHistoryDialog();
+    }
+
+    private void openHistoryEntry(HistoryStore.Entry entry) {
+        if (entry == null) {
+            return;
+        }
+        Uri uri = null;
+        String mime = entry.mime;
+        if (mime == null || mime.length() == 0) {
+            mime = SendFile.guessMimeType(entry.name);
+        }
+        try {
+            if (entry.uri != null && entry.uri.length() > 0) {
+                uri = Uri.parse(entry.uri);
+            } else if (entry.path != null && entry.path.length() > 0) {
+                File file = new File(entry.path);
+                if (!file.isFile()) {
+                    toast(getString(R.string.history_missing));
+                    return;
+                }
+                if (Build.VERSION.SDK_INT >= 24) {
+                    uri = ReceivedFileProvider.contentUriFor(file, mime);
+                } else {
+                    uri = Uri.fromFile(file);
+                }
+            }
+        } catch (Throwable t) {
+            uri = null;
+        }
+        if (uri == null) {
+            toast(getString(R.string.history_open_failed));
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, mime);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            toast(getString(R.string.history_no_app));
+        } catch (Throwable t) {
+            toast(getString(R.string.history_open_failed));
+        }
+    }
+
+    private String formatHistoryTime(long time) {
+        if (time <= 0L) {
+            return "";
+        }
+        try {
+            return new SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(new Date(time));
+        } catch (Throwable t) {
+            return "";
+        }
+    }
+
+    private void closeHistoryDialog() {
+        CardDialog dialog = historyDialog;
+        historyDialog = null;
+        if (dialog != null) {
+            try {
+                dialog.dismiss();
+            } catch (Throwable ignored) {
+                // 忽略
+            }
+        }
+    }
+
+    private void closeReceiveCompleteDialog() {
+        CardDialog dialog = receiveCompleteDialog;
+        receiveCompleteDialog = null;
+        previewGeneration++;
+        if (dialog != null) {
+            try {
+                dialog.dismiss();
+            } catch (Throwable ignored) {
+                // 忽略
+            }
+        }
     }
 
     @Override

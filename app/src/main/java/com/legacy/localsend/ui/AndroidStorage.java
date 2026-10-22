@@ -28,6 +28,17 @@ import java.io.OutputStream;
  */
 public class AndroidStorage implements StorageProvider {
 
+    /** 已落盘文件的实际位置，供历史记录/打开/删除使用（API 29+ 只有 MediaStore Uri）。 */
+    public interface SavedFileInfo {
+        /** 文件系统绝对路径；MediaStore 落盘时为 null。 */
+        String savedPath();
+
+        /** MediaStore content Uri 字符串；旧系统落盘时为 null。 */
+        String savedUri();
+
+        String savedName();
+    }
+
     private static final String FOLDER = "LocalSendLegacy";
     private static final String DEFAULT_MIME = "application/octet-stream";
 
@@ -146,7 +157,7 @@ public class AndroidStorage implements StorageProvider {
     }
 
     /** API 8~28 的落盘实现：先写 .part，校验完成后 rename 成正式文件。 */
-    private static final class LegacyIncomingFile implements IncomingFile {
+    private static final class LegacyIncomingFile implements IncomingFile, SavedFileInfo {
 
         private final FileMeta meta;
         private final File partFile;
@@ -208,6 +219,21 @@ public class AndroidStorage implements StorageProvider {
         @Override
         public String describe() {
             return committed ? targetFile.getAbsolutePath() : partFile.getAbsolutePath();
+        }
+
+        @Override
+        public String savedPath() {
+            return targetFile.getAbsolutePath();
+        }
+
+        @Override
+        public String savedUri() {
+            return null;
+        }
+
+        @Override
+        public String savedName() {
+            return targetFile.getName();
         }
     }
 
@@ -276,7 +302,7 @@ public class AndroidStorage implements StorageProvider {
     }
 
     @TargetApi(29)
-    private static final class MediaStoreIncomingFile implements IncomingFile {
+    private static final class MediaStoreIncomingFile implements IncomingFile, SavedFileInfo {
 
         private final ContentResolver resolver;
         private final Uri uri;
@@ -349,6 +375,21 @@ public class AndroidStorage implements StorageProvider {
         @Override
         public String describe() {
             return Environment.DIRECTORY_DOWNLOADS + "/" + FOLDER + "/" + displayName;
+        }
+
+        @Override
+        public String savedPath() {
+            return null;
+        }
+
+        @Override
+        public String savedUri() {
+            return uri.toString();
+        }
+
+        @Override
+        public String savedName() {
+            return displayName;
         }
     }
 }

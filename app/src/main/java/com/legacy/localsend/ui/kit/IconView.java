@@ -23,6 +23,14 @@ public class IconView extends View {
     public static final String TEXT = "text";
     public static final String FOLDER = "folder";
     public static final String APPS = "apps";
+    public static final String VIDEO = "video";
+    public static final String AUDIO = "audio";
+    public static final String APK = "apk";
+    public static final String PDF = "pdf";
+    public static final String DOC = "doc";
+    public static final String ARCHIVE = "archive";
+    public static final String HISTORY = "history";
+    public static final String DELETE = "delete";
     public static final String LAPTOP = "laptop";
     public static final String PHONE = "phone";
     public static final String REFRESH = "refresh";
@@ -270,6 +278,83 @@ public class IconView extends View {
             canvas.drawPath(path, strokePaint);
             canvas.drawLine(12f, 9f, 12f, 14.5f, strokePaint);
             canvas.drawCircle(12f, 17.4f, 1.3f, fillPaint);
+        } else if (VIDEO.equals(iconName)) {
+            rect.set(3f, 4.5f, 21f, 19.5f);
+            canvas.drawRoundRect(rect, 2.4f, 2.4f, strokePaint);
+            path.reset();
+            path.moveTo(10f, 8.5f);
+            path.lineTo(16f, 12f);
+            path.lineTo(10f, 15.5f);
+            path.close();
+            canvas.drawPath(path, fillPaint);
+        } else if (AUDIO.equals(iconName)) {
+            canvas.drawLine(14.5f, 5f, 14.5f, 15.5f, strokePaint);
+            path.reset();
+            path.moveTo(14.5f, 5f);
+            path.cubicTo(17.5f, 5.3f, 20f, 6.5f, 20f, 8.8f);
+            canvas.drawPath(path, strokePaint);
+            canvas.drawCircle(11.7f, 17.2f, 2.4f, fillPaint);
+            canvas.drawLine(11.7f, 17.2f, 11.7f, 11.5f, strokePaint);
+        } else if (APK.equals(iconName)) {
+            rect.set(5f, 9f, 19f, 20f);
+            canvas.drawRoundRect(rect, 3.4f, 3.4f, strokePaint);
+            canvas.drawLine(8.5f, 9.2f, 7f, 5.5f, strokePaint);
+            canvas.drawLine(15.5f, 9.2f, 17f, 5.5f, strokePaint);
+            canvas.drawCircle(9.4f, 13.6f, 1.2f, fillPaint);
+            canvas.drawCircle(14.6f, 13.6f, 1.2f, fillPaint);
+            canvas.drawLine(10f, 17f, 14f, 17f, strokePaint);
+        } else if (PDF.equals(iconName)) {
+            path.reset();
+            path.moveTo(7f, 2.5f);
+            path.lineTo(14f, 2.5f);
+            path.lineTo(18.5f, 7f);
+            path.lineTo(18.5f, 21.5f);
+            path.lineTo(5.5f, 21.5f);
+            path.lineTo(5.5f, 2.5f);
+            path.close();
+            canvas.drawPath(path, strokePaint);
+            fillPaint.setTextAlign(Paint.Align.CENTER);
+            fillPaint.setTextSize(5.2f);
+            canvas.drawText("PDF", 12f, 17.6f, fillPaint);
+            fillPaint.setTextAlign(Paint.Align.LEFT);
+        } else if (DOC.equals(iconName)) {
+            path.reset();
+            path.moveTo(7f, 2.5f);
+            path.lineTo(14f, 2.5f);
+            path.lineTo(18.5f, 7f);
+            path.lineTo(18.5f, 21.5f);
+            path.lineTo(5.5f, 21.5f);
+            path.lineTo(5.5f, 2.5f);
+            path.close();
+            canvas.drawPath(path, strokePaint);
+            canvas.drawLine(8.5f, 12f, 15.5f, 12f, strokePaint);
+            canvas.drawLine(8.5f, 15.5f, 15.5f, 15.5f, strokePaint);
+            canvas.drawLine(8.5f, 19f, 13f, 19f, strokePaint);
+        } else if (ARCHIVE.equals(iconName)) {
+            rect.set(5f, 3f, 19f, 21f);
+            canvas.drawRoundRect(rect, 1.6f, 1.6f, strokePaint);
+            canvas.drawLine(5f, 8f, 19f, 8f, strokePaint);
+            canvas.drawLine(12f, 8f, 12f, 11f, strokePaint);
+            canvas.drawLine(12f, 11f, 14f, 12.5f, strokePaint);
+            canvas.drawLine(14f, 12.5f, 12f, 14f, strokePaint);
+            canvas.drawLine(12f, 14f, 14f, 15.5f, strokePaint);
+            canvas.drawLine(14f, 15.5f, 12f, 17f, strokePaint);
+        } else if (HISTORY.equals(iconName)) {
+            canvas.drawCircle(12f, 12f, 8.6f, strokePaint);
+            canvas.drawLine(12f, 7f, 12f, 12.4f, strokePaint);
+            canvas.drawLine(12f, 12.4f, 15.8f, 14.6f, strokePaint);
+        } else if (DELETE.equals(iconName)) {
+            canvas.drawLine(4.5f, 6.8f, 19.5f, 6.8f, strokePaint);
+            rect.set(9.3f, 3.6f, 14.7f, 6.8f);
+            canvas.drawRoundRect(rect, 1f, 1f, strokePaint);
+            path.reset();
+            path.moveTo(6.5f, 6.8f);
+            path.lineTo(7.5f, 21f);
+            path.lineTo(16.5f, 21f);
+            path.lineTo(17.5f, 6.8f);
+            canvas.drawPath(path, strokePaint);
+            canvas.drawLine(10.5f, 10f, 10.8f, 18f, strokePaint);
+            canvas.drawLine(13.5f, 10f, 13.2f, 18f, strokePaint);
         }
     }
 

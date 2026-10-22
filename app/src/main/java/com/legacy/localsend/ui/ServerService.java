@@ -650,6 +650,8 @@ public class ServerService extends Service implements TransferListener, Discover
                 if (listener != null) {
                     listener.onReceiveComplete(files);
                 } else {
+                    // 界面不在前台时也记录历史，下次打开可以查看/打开/删除
+                    HistoryStore.addReceived(ServerService.this, files);
                     Notifications.notifyEvent(ServerService.this,
                             getString(R.string.notif_recv_done_title),
                             getString(R.string.notif_recv_done_text, Integer.valueOf(count), location));

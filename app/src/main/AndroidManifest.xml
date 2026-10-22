@@ -41,6 +41,12 @@
         <service
             android:name=".ui.ServerService"
             android:exported="false" />
+
+        <provider
+            android:name=".ui.ReceivedFileProvider"
+            android:authorities="com.legacy.localsend.files"
+            android:exported="false"
+            android:grantUriPermissions="true" />
     </application>
 </manifest>
 

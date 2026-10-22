@@ -52,6 +52,28 @@
     <string name="app_picker_system">系统</string>
     <string name="app_picker_close">关闭</string>
 
+    <!-- 接收历史 / 接收完成 -->
+    <string name="history_title">接收历史</string>
+    <string name="history_empty">还没有接收记录</string>
+    <string name="history_count">共 %1$d 条记录</string>
+    <string name="history_detail">%1$s · %2$s</string>
+    <string name="history_missing">文件已不存在</string>
+    <string name="history_open_failed">文件已不存在或无法打开</string>
+    <string name="history_no_app">没有可打开该文件的应用</string>
+    <string name="history_delete_title">删除记录</string>
+    <string name="history_delete_message">“%1$s”\n要同时删除源文件吗？</string>
+    <string name="history_delete_record">仅删记录</string>
+    <string name="history_delete_both">记录和文件</string>
+    <string name="history_deleted_record">已删除记录</string>
+    <string name="history_deleted_both">已删除记录和源文件</string>
+    <string name="history_delete_file_failed">记录已删除，但源文件删除失败</string>
+    <string name="recv_complete_title">接收完成</string>
+    <string name="recv_complete_summary">共 %1$d 个文件 · %2$s</string>
+    <string name="recv_complete_hint">点文件可直接打开</string>
+    <string name="recv_complete_more">还有 %1$d 个文件</string>
+    <string name="recv_complete_open">打开</string>
+    <string name="recv_complete_cancel">取消</string>
+
     <!-- 设备详情 -->
     <string name="device_info_title">设备详情</string>
     <string name="device_info_alias">别名</string>
