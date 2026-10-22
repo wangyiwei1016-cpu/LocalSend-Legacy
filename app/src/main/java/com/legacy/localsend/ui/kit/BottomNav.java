@@ -98,7 +98,7 @@ public class BottomNav extends LinearLayout {
     /** 主题切换后刷新自绘颜色。 */
     public void refreshTheme() {
         if (advanced) {
-            setBackgroundDrawable(Material.glass(22));
+            setBackgroundDrawable(Material.glass(22, this));
             setPadding(dp(getContext(), 4), 0, dp(getContext(), 4), 0);
             dividerPaint.setColor(0x00000000);
         } else {

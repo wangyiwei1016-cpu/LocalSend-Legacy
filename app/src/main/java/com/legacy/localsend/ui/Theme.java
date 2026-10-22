@@ -188,21 +188,21 @@ public final class Theme {
                 view.setBackgroundDrawable(strokedRoundRect(surface, stroke, 20));
             } else if ("tile".equals(key)) {
                 if (Material.enabled) {
-                    view.setBackgroundDrawable(Material.glass(20));
+                    view.setBackgroundDrawable(Material.glass(20, view));
                     Material.attachPress(view);
                 } else {
                     view.setBackgroundDrawable(pressable(surface, surfacePressed, stroke, 20));
                 }
             } else if ("pill".equals(key)) {
                 if (Material.enabled) {
-                    view.setBackgroundDrawable(Material.glass(24));
+                    view.setBackgroundDrawable(Material.glass(24, view));
                     Material.attachPress(view);
                 } else {
                     view.setBackgroundDrawable(pressable(surface, surfacePressed, stroke, 24));
                 }
             } else if ("glass-icon".equals(key)) {
                 if (Material.enabled) {
-                    view.setBackgroundDrawable(Material.glass(20));
+                    view.setBackgroundDrawable(Material.glass(20, view));
                     Material.attachPress(view);
                 } else {
                     view.setBackgroundColor(0x00000000);
