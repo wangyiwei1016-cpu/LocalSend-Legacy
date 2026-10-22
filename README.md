@@ -14,13 +14,19 @@
 
 界面参考官方 LocalSend 的 Material 3 风格重做：底部三 tab、悬浮玻璃导航、圆角卡片/对话框、自绘图标与开关；内置 6 套低饱和莫奈色主题、深色模式、高级材质雾透控件和自定义背景图。
 
+真机截图（Xiaomi 2013022 / Android 4.2.1 / 720×1280）：
+
 | 接收 | 发送 | 设置 |
 | --- | --- | --- |
-| ![接收](docs/screenshots/real-receive.png) | ![发送](docs/screenshots/real-send.png) | ![设置](docs/screenshots/real-settings.png) |
+| ![接收](docs/screenshots/v12-receive.png) | ![发送](docs/screenshots/v12-send.png) | ![设置](docs/screenshots/v12-settings.png) |
 
-| 接收确认 | 设备列表 |
-| --- | --- |
-| ![接收确认](docs/screenshots/receive-dialog.png) | ![设备列表](docs/screenshots/send-devices.png) |
+| 主题色 | 接收确认 | 接收完成（图片缩略图 / APK 图标） |
+| --- | --- | --- |
+| ![主题色](docs/screenshots/v12-themes.png) | ![接收确认](docs/screenshots/v12-receive-dialog.png) | ![接收完成](docs/screenshots/v12-receive-complete.png) |
+
+| 接收历史 | 背景与模糊/亮度 | 自定义背景效果 |
+| --- | --- | --- |
+| ![接收历史](docs/screenshots/v12-history.png) | ![背景设置](docs/screenshots/v12-background-settings.png) | ![背景效果](docs/screenshots/v12-receive-background.png) |
 
 ![应用图标](docs/screenshots/icon.png)
 
@@ -78,8 +84,8 @@ LocalSend v2 协议同时允许 `protocol: "http"` 与 `"https"`，设备在组�
 | --- | --- | --- |
 | 版本 | 1.2（versionCode 3） | 同左 |
 | minSdk / targetSdk | 8 / 30 | 同左 |
-| 大小 | 152,183 B | 255,976 B |
-| SHA-256 | `03042D35D4580225F54412D363209D7F1336F0968A1FCE54130B67ADB3E87328` | `0AAD9AC12CE30D55B6AABA6DA2C72955C7B4B881A19602C7E66AC9FDD767E46D` |
+| 大小 | 152,153 B | 247,712 B |
+| SHA-256 | `662FDB68A113DA795F26FFD65D191209F429DA07C81C2FF1A3CCA6118DD4F0EF` | `FAFF410807C6DCEC77190EC79392BC9546C589AC76CA8DB95C9603F20D8EAFD3` |
 | 签名 | v1=true、v2=true | v1=true、v2=true（debug） |
 
 ## 使用

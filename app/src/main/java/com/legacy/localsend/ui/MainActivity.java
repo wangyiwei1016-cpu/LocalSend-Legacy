@@ -2311,6 +2311,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
             content.addView(row, rowParams);
         }
         dialog.setBodyView(content);
+        dialog.setBodyScrollable(false);
         dialog.addDismissButton(getString(R.string.dialog_close));
         dialog.show();
     }
