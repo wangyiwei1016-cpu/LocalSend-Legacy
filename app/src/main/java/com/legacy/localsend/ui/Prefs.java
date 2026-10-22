@@ -23,6 +23,7 @@ public final class Prefs {
     private static final String KEY_FINGERPRINT = "fingerprint";
     private static final String KEY_AUTO_ACCEPT = "autoAccept";
     private static final String KEY_DARK_MODE = "darkMode";
+    private static final String KEY_THEME_COLOR = "themeColor";
     private static final String KEY_SHOW_SYSTEM_APPS = "showSystemApps";
 
     public static final int DEFAULT_PORT = 53317;
@@ -153,6 +154,24 @@ public final class Prefs {
 
     public void setDarkMode(boolean darkMode) {
         preferences.edit().putBoolean(KEY_DARK_MODE, darkMode).commit();
+    }
+
+    // ---------- 主题色（莫奈低饱和色板） ----------
+
+    public int getThemeColor() {
+        int index = preferences.getInt(KEY_THEME_COLOR, Theme.PALETTE_MIST_BLUE);
+        if (index < 0 || index >= Theme.PALETTE_COUNT) {
+            return Theme.PALETTE_MIST_BLUE;
+        }
+        return index;
+    }
+
+    public void setThemeColor(int index) {
+        int value = index;
+        if (value < 0 || value >= Theme.PALETTE_COUNT) {
+            value = Theme.PALETTE_MIST_BLUE;
+        }
+        preferences.edit().putInt(KEY_THEME_COLOR, value).commit();
     }
 
     // ---------- 应用列表：是否显示系统应用 ----------

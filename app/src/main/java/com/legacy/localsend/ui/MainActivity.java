@@ -97,6 +97,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
 
     private TextView settingsAliasValue;
     private TextView settingsPortValue;
+    private TextView settingsThemeValue;
     private TextView settingsDir;
     private TextView settingsFingerprint;
     private TextView settingsVersion;
@@ -231,6 +232,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
 
         settingsAliasValue = (TextView) findViewById(R.id.settings_alias_value);
         settingsPortValue = (TextView) findViewById(R.id.settings_port_value);
+        settingsThemeValue = (TextView) findViewById(R.id.settings_theme_value);
         settingsDir = (TextView) findViewById(R.id.settings_dir);
         settingsFingerprint = (TextView) findViewById(R.id.settings_fingerprint);
         settingsVersion = (TextView) findViewById(R.id.settings_version);
@@ -254,6 +256,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         icon(R.id.receive_link_icon).setIcon(IconView.GLOBE, Theme.primary);
         icon(R.id.chevron_alias).setIcon(IconView.CHEVRON, Theme.textSecondary);
         icon(R.id.chevron_port).setIcon(IconView.CHEVRON, Theme.textSecondary);
+        icon(R.id.chevron_theme).setIcon(IconView.CHEVRON, Theme.textSecondary);
     }
 
     private void bindListeners() {
@@ -359,6 +362,12 @@ public class MainActivity extends Activity implements ServerService.UiListener {
                 showPortDialog();
             }
         });
+        findViewById(R.id.row_theme).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showThemeDialog();
+            }
+        });
 
         autoSwitch.setOnCheckedChangeListener(new SwitchView.OnCheckedChangeListener() {
             @Override
@@ -455,6 +464,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         settingsDir.setText(prefs.getReceiveDirectory());
         settingsFingerprint.setText(prefs.getFingerprint());
         settingsVersion.setText(getString(R.string.settings_version_value));
+        settingsThemeValue.setText(themeName(prefs.getThemeColor()));
         updatingSwitch = true;
         autoSwitch.setChecked(prefs.isAutoAccept());
         darkSwitch.setChecked(prefs.isDarkMode());
@@ -1579,9 +1589,78 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         dialog.show();
     }
 
-    // ------------------------------------------------------------------
-    // 进度 / 错误对话框
-    // ------------------------------------------------------------------
+    private void showThemeDialog() {
+        final CardDialog dialog = new CardDialog(this, getString(R.string.theme_title));
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        final int selected = prefs.getThemeColor();
+        for (int i = 0; i < Theme.PALETTE_COUNT; i++) {
+            final int index = i;
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setMinimumHeight(dp(56));
+            row.setPadding(dp(8), dp(6), dp(8), dp(6));
+            row.setBackgroundDrawable(index == selected
+                    ? Theme.roundRect(Theme.primaryContainer, 12) : Theme.rowPressable());
+            row.setClickable(true);
+            row.setFocusable(true);
+
+            View swatch = new View(this);
+            swatch.setBackgroundDrawable(Theme.strokedRoundRect(
+                    Theme.primaryFor(index), Theme.containerFor(index), 16));
+            row.addView(swatch, new LinearLayout.LayoutParams(dp(32), dp(32)));
+
+            TextView name = textView(themeName(index), 15f, Theme.text);
+            LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            nameParams.leftMargin = dp(14);
+            row.addView(name, nameParams);
+
+            if (index == selected) {
+                IconView check = new IconView(this);
+                check.setIcon(IconView.CHECK, Theme.primary);
+                row.addView(check, new LinearLayout.LayoutParams(dp(22), dp(22)));
+            }
+
+            row.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    prefs.setThemeColor(index);
+                    dialog.dismiss();
+                    Theme.load(MainActivity.this);
+                    recreateForTheme();
+                }
+            });
+            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            if (i > 0) {
+                rowParams.topMargin = dp(2);
+            }
+            content.addView(row, rowParams);
+        }
+        dialog.setBodyView(content);
+        dialog.addDismissButton(getString(R.string.dialog_close));
+        dialog.show();
+    }
+
+    private String themeName(int index) {
+        switch (index) {
+            case Theme.PALETTE_SAGE:
+                return getString(R.string.theme_sage);
+            case Theme.PALETTE_ROSE:
+                return getString(R.string.theme_rose);
+            case Theme.PALETTE_LAVENDER:
+                return getString(R.string.theme_lavender);
+            case Theme.PALETTE_TERRACOTTA:
+                return getString(R.string.theme_terracotta);
+            case Theme.PALETTE_TEAL:
+                return getString(R.string.theme_teal);
+            case Theme.PALETTE_MIST_BLUE:
+            default:
+                return getString(R.string.theme_mist_blue);
+        }
+    }
 
     private void startSendProgress() {
         sendTotalBytes = 0L;

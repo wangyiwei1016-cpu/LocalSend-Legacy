@@ -20,6 +20,48 @@ import android.widget.TextView;
  */
 public final class Theme {
 
+    /** 莫奈色系：低饱和、偏灰的强调色；数值与 Prefs 里保存的序号一致。 */
+    public static final int PALETTE_MIST_BLUE = 0;
+    public static final int PALETTE_SAGE = 1;
+    public static final int PALETTE_ROSE = 2;
+    public static final int PALETTE_LAVENDER = 3;
+    public static final int PALETTE_TERRACOTTA = 4;
+    public static final int PALETTE_TEAL = 5;
+    public static final int PALETTE_COUNT = 6;
+
+    private static final int[] LIGHT_PRIMARY = {
+            0xFF5F7A8F, // 雾蓝
+            0xFF667C63, // 鼠尾草
+            0xFF9C6B75, // 藕粉
+            0xFF7E7099, // 薰衣草
+            0xFF9A6B52, // 陶土
+            0xFF557F7C  // 青灰
+    };
+    private static final int[] LIGHT_CONTAINER = {
+            0xFFE7EEF3,
+            0xFFE8EFE6,
+            0xFFF5E8EA,
+            0xFFEEEAF5,
+            0xFFF5EAE3,
+            0xFFE3EFEE
+    };
+    private static final int[] DARK_PRIMARY = {
+            0xFFA9C0D2,
+            0xFFAFC6AA,
+            0xFFD6AAB2,
+            0xFFBCB0D6,
+            0xFFD3AB93,
+            0xFF9CC4C0
+    };
+    private static final int[] DARK_CONTAINER = {
+            0xFF27343E,
+            0xFF2B3729,
+            0xFF3A2B2F,
+            0xFF302B3D,
+            0xFF3A2E26,
+            0xFF243634
+    };
+
     public static boolean dark;
 
     public static int bg;
@@ -36,6 +78,7 @@ public final class Theme {
     public static int switchThumbOff;
     public static int switchThumbOn;
 
+    private static int palette = PALETTE_MIST_BLUE;
     private static float density = 1f;
 
     static {
@@ -46,13 +89,39 @@ public final class Theme {
     }
 
     public static void load(Context context) {
-        dark = Prefs.get(context).isDarkMode();
+        Prefs prefs = Prefs.get(context);
+        dark = prefs.isDarkMode();
+        palette = prefs.getThemeColor();
         density = context.getResources().getDisplayMetrics().density;
         if (dark) {
             applyDark();
         } else {
             applyLight();
         }
+        applyPalette();
+    }
+
+    public static int getPalette() {
+        return palette;
+    }
+
+    /** 指定色板在当前明暗模式下的强调色，用于设置页预览。 */
+    public static int primaryFor(int index) {
+        int safe = index < 0 || index >= PALETTE_COUNT ? PALETTE_MIST_BLUE : index;
+        return dark ? DARK_PRIMARY[safe] : LIGHT_PRIMARY[safe];
+    }
+
+    /** 指定色板在当前明暗模式下的浅色容器，用于设置页预览。 */
+    public static int containerFor(int index) {
+        int safe = index < 0 || index >= PALETTE_COUNT ? PALETTE_MIST_BLUE : index;
+        return dark ? DARK_CONTAINER[safe] : LIGHT_CONTAINER[safe];
+    }
+
+    private static void applyPalette() {
+        int index = palette < 0 || palette >= PALETTE_COUNT ? PALETTE_MIST_BLUE : palette;
+        primary = dark ? DARK_PRIMARY[index] : LIGHT_PRIMARY[index];
+        primaryContainer = dark ? DARK_CONTAINER[index] : LIGHT_CONTAINER[index];
+        switchTrackOff = dark ? 0xFF3A414D : primaryContainer;
     }
 
     private static void applyLight() {
@@ -62,11 +131,11 @@ public final class Theme {
         text = 0xFF111827;
         textSecondary = 0xFF6B7280;
         textTertiary = 0xFF9CA3AF;
-        primary = 0xFF2563EB;
-        primaryContainer = 0xFFE8EAFF;
+        primary = LIGHT_PRIMARY[PALETTE_MIST_BLUE];
+        primaryContainer = LIGHT_CONTAINER[PALETTE_MIST_BLUE];
         stroke = 0xFFE5E7EB;
         danger = 0xFFDC2626;
-        switchTrackOff = 0xFFE8EAFF;
+        switchTrackOff = primaryContainer;
         switchThumbOff = 0xFF6B7280;
         switchThumbOn = 0xFFFFFFFF;
     }
@@ -78,8 +147,8 @@ public final class Theme {
         text = 0xFFE8EAED;
         textSecondary = 0xFFA6ADB8;
         textTertiary = 0xFF7D8592;
-        primary = 0xFF8AB4F8;
-        primaryContainer = 0xFF1E3355;
+        primary = DARK_PRIMARY[PALETTE_MIST_BLUE];
+        primaryContainer = DARK_CONTAINER[PALETTE_MIST_BLUE];
         stroke = 0xFF2D333D;
         danger = 0xFFF28B82;
         switchTrackOff = 0xFF3A414D;

@@ -150,6 +150,47 @@
                         android:layout_width="52dp"
                         android:layout_height="32dp" />
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/stroke"
+                    android:tag="divider" />
+
+                <LinearLayout
+                    android:id="@+id/row_theme"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:text="@string/settings_theme"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/settings_theme_value"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:gravity="right"
+                        android:singleLine="true"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="16sp" />
+
+                    <com.legacy.localsend.ui.kit.IconView
+                        android:id="@+id/chevron_theme"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginLeft="6dp" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout

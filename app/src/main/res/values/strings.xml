@@ -72,6 +72,14 @@
     <string name="settings_port">端口</string>
     <string name="settings_auto_accept">自动接收文件</string>
     <string name="settings_dark_mode">深色模式</string>
+    <string name="settings_theme">主题色</string>
+    <string name="theme_title">主题色</string>
+    <string name="theme_mist_blue">雾蓝</string>
+    <string name="theme_sage">鼠尾草</string>
+    <string name="theme_rose">藕粉</string>
+    <string name="theme_lavender">薰衣草</string>
+    <string name="theme_terracotta">陶土</string>
+    <string name="theme_teal">青灰</string>
     <string name="settings_receive_dir">接收目录</string>
     <string name="settings_fingerprint">本机指纹</string>
     <string name="settings_version">版本</string>
