@@ -99,6 +99,7 @@ public final class Theme {
             applyLight();
         }
         applyPalette();
+        Material.load(context);
     }
 
     public static int getPalette() {
@@ -178,13 +179,34 @@ public final class Theme {
         if (tag instanceof String) {
             String key = (String) tag;
             if ("page".equals(key)) {
-                view.setBackgroundColor(bg);
+                if (Material.enabled) {
+                    view.setBackgroundDrawable(Material.fog());
+                } else {
+                    view.setBackgroundColor(bg);
+                }
             } else if ("card".equals(key)) {
                 view.setBackgroundDrawable(strokedRoundRect(surface, stroke, 20));
             } else if ("tile".equals(key)) {
-                view.setBackgroundDrawable(pressable(surface, surfacePressed, stroke, 20));
+                if (Material.enabled) {
+                    view.setBackgroundDrawable(Material.glass(20));
+                    Material.attachPress(view);
+                } else {
+                    view.setBackgroundDrawable(pressable(surface, surfacePressed, stroke, 20));
+                }
             } else if ("pill".equals(key)) {
-                view.setBackgroundDrawable(pressable(surface, surfacePressed, stroke, 24));
+                if (Material.enabled) {
+                    view.setBackgroundDrawable(Material.glass(24));
+                    Material.attachPress(view);
+                } else {
+                    view.setBackgroundDrawable(pressable(surface, surfacePressed, stroke, 24));
+                }
+            } else if ("glass-icon".equals(key)) {
+                if (Material.enabled) {
+                    view.setBackgroundDrawable(Material.glass(20));
+                    Material.attachPress(view);
+                } else {
+                    view.setBackgroundColor(0x00000000);
+                }
             } else if ("selection".equals(key)) {
                 view.setBackgroundDrawable(roundRect(primaryContainer, 12));
             } else if ("chip".equals(key)) {

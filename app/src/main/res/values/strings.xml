@@ -95,6 +95,8 @@
     <string name="settings_auto_accept">自动接收文件</string>
     <string name="settings_dark_mode">深色模式</string>
     <string name="settings_theme">主题色</string>
+    <string name="settings_advanced_material">高级材质</string>
+    <string name="settings_advanced_material_hint">雾透悬浮控件与光感底栏；旧机器开启后可能变卡</string>
     <string name="theme_title">主题色</string>
     <string name="theme_mist_blue">雾蓝</string>
     <string name="theme_sage">鼠尾草</string>

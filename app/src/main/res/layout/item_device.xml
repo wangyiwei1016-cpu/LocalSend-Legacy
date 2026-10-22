@@ -57,6 +57,7 @@
 
     <com.legacy.localsend.ui.kit.IconView
         android:id="@+id/device_info"
+        android:tag="glass-icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginLeft="6dp"

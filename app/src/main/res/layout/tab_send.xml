@@ -15,7 +15,7 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:paddingTop="14dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="96dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -226,6 +226,7 @@
 
             <TextView
                 android:id="@+id/selection_clear"
+                android:tag="glass-icon"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:gravity="center"
@@ -254,24 +255,28 @@
 
             <com.legacy.localsend.ui.kit.IconView
                 android:id="@+id/btn_refresh"
+                android:tag="glass-icon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="8dp" />
 
             <com.legacy.localsend.ui.kit.IconView
                 android:id="@+id/btn_manual_add"
+                android:tag="glass-icon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="8dp" />
 
             <com.legacy.localsend.ui.kit.IconView
                 android:id="@+id/btn_favorite"
+                android:tag="glass-icon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="8dp" />
 
             <com.legacy.localsend.ui.kit.IconView
                 android:id="@+id/btn_gear"
+                android:tag="glass-icon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="8dp" />

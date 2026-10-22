@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.legacy.localsend.ui.Material;
 import com.legacy.localsend.ui.Theme;
 
 /** 底部导航：3 项（接收/发送/设置），选中项图标包在 56x32dp 浅紫胶囊里。 */
@@ -29,6 +30,7 @@ public class BottomNav extends LinearLayout {
     private final IconView[] icons = new IconView[3];
     private final TextView[] labels = new TextView[3];
     private int selectedIndex = 0;
+    private boolean advanced;
     private Listener listener;
 
     public BottomNav(Context context) {
@@ -60,6 +62,9 @@ public class BottomNav extends LinearLayout {
                     select(index, true);
                 }
             });
+            if (Material.enabled) {
+                Material.attachPress(item);
+            }
 
             FrameLayout frame = new FrameLayout(context);
             IconView icon = new IconView(context);
@@ -92,10 +97,22 @@ public class BottomNav extends LinearLayout {
 
     /** 主题切换后刷新自绘颜色。 */
     public void refreshTheme() {
-        setBackgroundColor(Theme.surface);
-        dividerPaint.setColor(Theme.stroke);
+        if (advanced) {
+            setBackgroundDrawable(Material.glass(22));
+            setPadding(dp(getContext(), 4), 0, dp(getContext(), 4), 0);
+            dividerPaint.setColor(0x00000000);
+        } else {
+            setBackgroundColor(Theme.surface);
+            setPadding(0, 0, 0, 0);
+            dividerPaint.setColor(Theme.stroke);
+        }
         select(selectedIndex, false);
         invalidate();
+    }
+
+    public void setAdvanced(boolean value) {
+        advanced = value;
+        refreshTheme();
     }
 
     public void setListener(Listener l) {
@@ -133,7 +150,9 @@ public class BottomNav extends LinearLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawLine(0, 0.5f, getWidth(), 0.5f, dividerPaint);
+        if (!advanced) {
+            canvas.drawLine(0, 0.5f, getWidth(), 0.5f, dividerPaint);
+        }
     }
 
     private static int dp(Context context, int value) {

@@ -191,6 +191,40 @@
                         android:layout_height="24dp"
                         android:layout_marginLeft="6dp" />
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/stroke"
+                    android:tag="divider" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_advanced_material"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp" />
+
+                    <com.legacy.localsend.ui.kit.SwitchView
+                        android:id="@+id/advanced_material_switch"
+                        android:layout_width="52dp"
+                        android:layout_height="32dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="6dp"
+                    android:text="@string/settings_advanced_material_hint"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout

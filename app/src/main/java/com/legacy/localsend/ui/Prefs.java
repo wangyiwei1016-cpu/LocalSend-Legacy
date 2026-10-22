@@ -24,6 +24,7 @@ public final class Prefs {
     private static final String KEY_AUTO_ACCEPT = "autoAccept";
     private static final String KEY_DARK_MODE = "darkMode";
     private static final String KEY_THEME_COLOR = "themeColor";
+    private static final String KEY_ADVANCED_MATERIAL = "advancedMaterial";
     private static final String KEY_SHOW_SYSTEM_APPS = "showSystemApps";
 
     public static final int DEFAULT_PORT = 53317;
@@ -182,6 +183,16 @@ public final class Prefs {
 
     public void setShowSystemApps(boolean show) {
         preferences.edit().putBoolean(KEY_SHOW_SYSTEM_APPS, show).commit();
+    }
+
+    // ---------- 高级材质（雾透玻璃控件） ----------
+
+    public boolean isAdvancedMaterial() {
+        return preferences.getBoolean(KEY_ADVANCED_MATERIAL, false);
+    }
+
+    public void setAdvancedMaterial(boolean enabled) {
+        preferences.edit().putBoolean(KEY_ADVANCED_MATERIAL, enabled).commit();
     }
 
     // ---------- 接收目录 ----------

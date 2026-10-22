@@ -85,6 +85,7 @@
 
     <com.legacy.localsend.ui.kit.IconView
         android:id="@+id/btn_history"
+        android:tag="glass-icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="top|right"

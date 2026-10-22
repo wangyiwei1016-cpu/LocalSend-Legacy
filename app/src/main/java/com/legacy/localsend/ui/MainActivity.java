@@ -27,6 +27,8 @@ import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -109,6 +111,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     private TextView settingsVersion;
     private SwitchView autoSwitch;
     private SwitchView darkSwitch;
+    private SwitchView advancedSwitch;
     private boolean updatingSwitch;
 
     private CardDialog receiveDialog;
@@ -249,8 +252,10 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         settingsVersion = (TextView) findViewById(R.id.settings_version);
         autoSwitch = (SwitchView) findViewById(R.id.auto_accept_switch);
         darkSwitch = (SwitchView) findViewById(R.id.dark_mode_switch);
+        advancedSwitch = (SwitchView) findViewById(R.id.advanced_material_switch);
 
         rebuildIcons();
+        updateBottomNavStyle();
     }
 
     private void rebuildIcons() {
@@ -410,10 +415,38 @@ public class MainActivity extends Activity implements ServerService.UiListener {
                 applyThemeChange();
             }
         });
+
+        advancedSwitch.setOnCheckedChangeListener(new SwitchView.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchView view, boolean checked) {
+                if (updatingSwitch) {
+                    return;
+                }
+                prefs.setAdvancedMaterial(checked);
+                applyThemeChange();
+            }
+        });
     }
 
     private IconView icon(int id) {
         return (IconView) findViewById(id);
+    }
+
+    private void updateBottomNavStyle() {
+        if (bottomNav == null) {
+            return;
+        }
+        ViewGroup.LayoutParams raw = bottomNav.getLayoutParams();
+        if (raw instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) raw;
+            int margin = Material.enabled ? dp(12) : 0;
+            params.leftMargin = margin;
+            params.rightMargin = margin;
+            params.bottomMargin = margin;
+            params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+            bottomNav.setLayoutParams(params);
+        }
+        bottomNav.setAdvanced(Material.enabled);
     }
 
     private void selectTab(int index) {
@@ -487,6 +520,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         updatingSwitch = true;
         autoSwitch.setChecked(prefs.isAutoAccept());
         darkSwitch.setChecked(prefs.isDarkMode());
+        advancedSwitch.setChecked(prefs.isAdvancedMaterial());
         updatingSwitch = false;
     }
 
@@ -524,6 +558,14 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         } else {
             attachAttempts = 0;
             scheduleAttach();
+        }
+        if (Material.enabled) {
+            Animation fade = new AlphaAnimation(0.45f, 1f);
+            fade.setDuration(220L);
+            View content = findViewById(android.R.id.content);
+            if (content != null) {
+                content.startAnimation(fade);
+            }
         }
     }
 
