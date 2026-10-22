@@ -1,4 +1,4 @@
-# LocalSend 老机版（LocalSend Legacy）
+# LocalSend Legacy（老机版）
 
 让 **Android 2.2+ 的老手机** 也能用 [LocalSend](https://localsend.org) 的独立 Android 客户端：同一 Wi-Fi 下收发文件，不需要互联网、不需要账号，与官方 LocalSend v2 的**明文 HTTP** 模式互通。
 
@@ -61,8 +61,8 @@ LocalSend v2 协议同时允许 `protocol: "http"` 与 `"https"`，设备在组�
 | --- | --- | --- |
 | 版本 | 1.2（versionCode 3） | 同左 |
 | minSdk / targetSdk | 8 / 30 | 同左 |
-| 大小 | 127,794 B | 152,015 B |
-| SHA-256 | `F8B97C08212C195A7526A91DDE2FA6D6EC703D0CBA91813F7CA23E97933C5039` | `48F31630B6E74233BDB350A693D3F2B35FFCE2E5C22A4E531F2B63D7A18D1E0C` |
+| 大小 | 127,787 B | 171,300 B |
+| SHA-256 | `7E6155CBA405DAB0FA743F1411F920999A9BA727EEDCB0281CBDC4BEB2863EE7` | `4F942D55D7FE51E34644B5D4A8C7916F70D7E17FA1F90C35401F04FD8EFE89DB` |
 | 签名 | v1=true、v2=true | v1=true、v2=true（debug） |
 
 ## 使用

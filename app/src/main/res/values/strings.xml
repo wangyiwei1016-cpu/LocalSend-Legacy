@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LocalSend 老机版</string>
-    <string name="title_main">LocalSend 老机版</string>
+    <string name="app_name">LocalSend Legacy</string>
+    <string name="title_main">LocalSend Legacy</string>
     <string name="title_settings">设置</string>
 
     <!-- 底部导航 -->

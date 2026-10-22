@@ -1,4 +1,4 @@
-# LocalSend 老机版（LocalSend Legacy）一键构建 / 签名校验 / 交付 / 安装
+# LocalSend Legacy（老机版）一键构建 / 签名校验 / 交付 / 安装
 #
 # 用法（PowerShell 7）:
 #   .\build.ps1                          # 构建 debug APK + 校验 + 复制到 dist/
