@@ -388,7 +388,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
                     return;
                 }
                 prefs.setDarkMode(checked);
-                recreateForTheme();
+                applyThemeChange();
             }
         });
     }
@@ -471,19 +471,39 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         updatingSwitch = false;
     }
 
-    private void recreateForTheme() {
-        if (Build.VERSION.SDK_INT >= 11) {
-            recreateCompat();
-        } else {
-            Intent intent = getIntent();
-            finish();
-            startActivity(intent);
-        }
-    }
+    /**
+     * 主题切换时原地重建界面，而不是 recreate Activity。
+     * recreate 会让窗口重新走一遍创建流程，在部分老机器上会黑闪一下；
+     * 这里只替换 content view，窗口和 Activity 都保留，切换更平滑。
+     */
+    private void applyThemeChange() {
+        int tab = currentTab;
+        closeReceiveDialog(true);
+        closeProgressDialog();
+        closePrepareDialog();
+        closeAppPicker();
 
-    @TargetApi(11)
-    private void recreateCompat() {
-        recreate();
+        Theme.load(this);
+        getWindow().setBackgroundDrawable(new ColorDrawable(Theme.bg));
+        setContentView(R.layout.activity_main);
+        Theme.applyTo(findViewById(android.R.id.content));
+
+        bindViews();
+        bottomNav.refreshTheme();
+        bindListeners();
+        selectTab(tab);
+        refreshReceiveHeader();
+        refreshSettings();
+        renderDevices();
+        updateSelectionCard();
+        updateEmptyView();
+
+        if (service != null) {
+            service.setUiListener(this);
+        } else {
+            attachAttempts = 0;
+            scheduleAttach();
+        }
     }
 
     // ------------------------------------------------------------------
@@ -1629,7 +1649,7 @@ public class MainActivity extends Activity implements ServerService.UiListener {
                     prefs.setThemeColor(index);
                     dialog.dismiss();
                     Theme.load(MainActivity.this);
-                    recreateForTheme();
+                    applyThemeChange();
                 }
             });
             LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
