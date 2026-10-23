@@ -536,6 +536,10 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         if (bottomNav.getSelectedIndex() != index) {
             bottomNav.select(index, false);
         }
+        // 部分老系统（如 Android 4.2）在页面 GONE -> VISIBLE 后会沿用切换前的
+        // 显示列表，自定义背景图会停留在旧画面上，要等下次重绘才恢复。
+        // 切页时重新套一次背景，保证显示的就是当前图片。
+        Background.refreshPages(findViewById(android.R.id.content));
         if (index == TAB_RECEIVE) {
             refreshReceiveHeader();
         } else if (index == TAB_SEND) {

@@ -180,13 +180,7 @@ public final class Theme {
         if (tag instanceof String) {
             String key = (String) tag;
             if ("page".equals(key)) {
-                if (Background.hasImage()) {
-                    view.setBackgroundDrawable(Background.drawable());
-                } else if (Material.enabled) {
-                    view.setBackgroundDrawable(Material.fog());
-                } else {
-                    view.setBackgroundColor(bg);
-                }
+                Background.applyTo(view);
             } else if ("card".equals(key)) {
                 view.setBackgroundDrawable(strokedRoundRect(surface, stroke, 20));
             } else if ("tile".equals(key)) {

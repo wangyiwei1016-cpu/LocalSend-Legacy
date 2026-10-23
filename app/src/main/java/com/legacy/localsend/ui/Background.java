@@ -172,6 +172,20 @@ final class Background {
         return new ImageDrawable();
     }
 
+    /** 给单个页面套上当前背景：图片、雾底或纯色。 */
+    static void applyTo(View page) {
+        if (page == null) {
+            return;
+        }
+        if (hasImage()) {
+            page.setBackgroundDrawable(drawable());
+        } else if (Material.enabled) {
+            page.setBackgroundDrawable(Material.fog());
+        } else {
+            page.setBackgroundColor(Theme.bg);
+        }
+    }
+
     /** 设置变化后，把背景重新套到所有带 page tag 的页面上。 */
     static void refreshPages(View root) {
         if (root == null) {
@@ -179,13 +193,7 @@ final class Background {
         }
         Object tag = root.getTag();
         if (tag instanceof String && "page".equals(tag)) {
-            if (hasImage()) {
-                root.setBackgroundDrawable(drawable());
-            } else if (Material.enabled) {
-                root.setBackgroundDrawable(Material.fog());
-            } else {
-                root.setBackgroundColor(Theme.bg);
-            }
+            applyTo(root);
         }
         if (root instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) root;
