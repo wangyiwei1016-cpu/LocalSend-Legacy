@@ -84,9 +84,11 @@ LocalSend v2 协议同时允许 `protocol: "http"` 与 `"https"`，设备在组�
 | --- | --- | --- |
 | 版本 | 1.2（versionCode 3） | 同左 |
 | minSdk / targetSdk | 8 / 30 | 同左 |
-| 大小 | 145,042 B | 243,068 B |
-| SHA-256 | `F38DF3BD98AC44D159082E634422CCC54F0D60A290802868F74E6311815BAFE8` | `EBF71783510693BF6D6991047C5CBB86C5F925810EDEEFA098A6D8D15FAAECA7` |
+| 大小 | 145,177 B | 173,633 B |
+| SHA-256 | `E26DB916736C55D46662F52F4A9242CD380BD22ABD025750ED12CA5A2FE428B9` | `4DF6A2BAC565024D2CEBD163B21FE6816722D69D97055AADB427B614ACE7E746` |
 | 签名 | v1=true、v2=true | v1=true、v2=true（debug） |
+
+> 2026-10-23 重新上传了 1.2 安装包（版本号不变），修复两处问题：切换页面后自定义背景消失、设置页「背景模糊 / 背景亮度」滑杆圆点偏移；功能与协议没有变化。
 
 ## 使用
 
