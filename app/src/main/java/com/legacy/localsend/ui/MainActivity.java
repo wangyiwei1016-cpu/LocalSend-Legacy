@@ -508,8 +508,22 @@ public class MainActivity extends Activity implements ServerService.UiListener {
             return;
         }
         bar.setProgressDrawable(SliderDrawable.track());
-        bar.setThumb(SliderDrawable.thumb());
+        // 圆点由 SliderDrawable 自己画（和轨道共用中线），系统的 thumb 会偏上，去掉。
+        bar.setThumb(null);
         bar.setPadding(dp(12), 0, dp(12), 0);
+        syncSeekBarLevel(bar);
+    }
+
+    /** 布局里写的 progress 在换过 drawable 后不一定同步给 level，手动补一次。 */
+    private void syncSeekBarLevel(SeekBar bar) {
+        if (bar == null) {
+            return;
+        }
+        Drawable drawable = bar.getProgressDrawable();
+        int max = bar.getMax();
+        if (drawable != null && max > 0) {
+            drawable.setLevel((int) (bar.getProgress() * 10000f / max));
+        }
     }
 
     private void updateBottomNavStyle() {
@@ -614,6 +628,8 @@ public class MainActivity extends Activity implements ServerService.UiListener {
         int brightnessValue = prefs.getBackgroundBrightness();
         backgroundBlurSeek.setProgress(blurValue);
         backgroundBrightnessSeek.setProgress(brightnessValue);
+        syncSeekBarLevel(backgroundBlurSeek);
+        syncSeekBarLevel(backgroundBrightnessSeek);
         backgroundBlurValue.setText(hasBackground
                 ? getString(R.string.background_percent, Integer.valueOf(blurValue))
                 : getString(R.string.background_need_image));
