@@ -211,6 +211,17 @@ public class MainActivity extends Activity implements ServerService.UiListener {
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (!hasFocus) {
+            return;
+        }
+        // 对话框关闭或从后台回到前台时，老系统可能不重绘静态页面，
+        // 自定义背景会变成空白；重新套一次背景，强制这一帧重绘。
+        Background.refreshPages(findViewById(android.R.id.content));
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         uiHandler.removeCallbacks(attachRunnable);
